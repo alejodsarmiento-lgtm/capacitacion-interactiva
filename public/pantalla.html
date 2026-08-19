@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pantalla · Capacitación MTPBA</title>
+<style>
+  :root{ --dark:#2E4D6B; --band:#3B6491; --light:#DCE6F1; --gray:#F2F2F2; --border:#B7C2CD;
+         --ok:#2e7d4f; --bad:#b3402a; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:#1c2b3a;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  header{background:var(--band);color:#fff;padding:14px 30px;display:flex;justify-content:space-between;align-items:center}
+  header .t1{font-size:14px;letter-spacing:.06em;text-transform:uppercase;opacity:.9}
+  header .t2{font-size:22px;font-weight:bold}
+  header .right{text-align:right;font-size:16px}
+  main{flex:1;padding:28px 40px;overflow:hidden;display:flex;flex-direction:column}
+  .bloque{font-size:16px;text-transform:uppercase;letter-spacing:.06em;color:var(--band);font-weight:bold}
+  h1{font-size:34px;color:var(--dark);margin:6px 0 22px;line-height:1.25}
+  .waiting{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:18px}
+  .waiting .big{font-size:40px;color:var(--dark);font-weight:bold}
+  .waiting .url{font-size:30px;background:var(--light);border:2px solid var(--border);border-radius:14px;padding:14px 34px;color:var(--dark);font-weight:bold}
+  .counter{font-size:22px;color:#5a6b7d}
+  .bars{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px;max-width:1100px}
+  .brow .lab{display:flex;justify-content:space-between;font-size:21px;margin-bottom:6px}
+  .brow .lab .r{color:#5a6b7d}
+  .bar{height:34px;background:var(--gray);border-radius:17px;overflow:hidden}
+  .bar>div{height:100%;background:var(--band);border-radius:17px;transition:width .45s;display:flex;align-items:center;justify-content:flex-end;padding-right:14px;color:#fff;font-weight:bold;font-size:17px;min-width:44px}
+  .bar>div.c{background:var(--ok)}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:34px;flex:1;align-content:center;max-width:1200px}
+  .split h2{font-size:26px;margin-bottom:14px}
+  .heat{width:100%;border-collapse:collapse;font-size:17px;max-width:1150px}
+  .heat td,.heat th{border:1px solid var(--border);padding:9px 10px;text-align:center}
+  .heat th{background:var(--light);color:var(--dark)}
+  .heat td.lbl{text-align:left;font-size:16px}
+  .cloud{flex:1;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:6px;max-width:1150px;margin:0 auto}
+  .cloud span{padding:4px 10px}
+  footer{background:var(--dark);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:12px 30px;font-size:19px}
+  .duel{display:flex;gap:26px;font-size:24px;font-weight:bold}
+  .explain{background:var(--light);border-left:6px solid var(--band);padding:14px 18px;font-size:19px;border-radius:0 10px 10px 0;margin-top:18px;max-width:1100px;line-height:1.4}
+  .qflash{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;border-radius:14px;padding:14px 26px;font-size:20px;max-width:80%;box-shadow:0 6px 24px rgba(0,0,0,.25);opacity:0;transition:.4s}
+  .qflash.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="t1">Ministerio de Trabajo PBA · Cooperación Argentina — Guatemala</div>
+    <div class="t2">Inspección del trabajo en casas particulares</div>
+  </div>
+  <div class="right" id="hdrRight">Sumate: <b id="hdrUrl"></b></div>
+</header>
+<main id="main"></main>
+<footer>
+  <div id="fConn">0 conectados · 🇦🇷 0 · 🇬🇹 0</div>
+  <div class="duel">Duelo &nbsp; 🇦🇷 <span id="fAR">0</span> — <span id="fGT">0</span> 🇬🇹</div>
+</footer>
+<div class="qflash" id="qflash"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io({transports:['websocket','polling']});
+const params = new URLSearchParams(location.search);
+const token = params.get('token') || '';
+let ACT=[], current=null, revealed=false;
+document.getElementById('hdrUrl').textContent = location.host;
+
+function staffJoin(){
+  socket.emit('staffJoin',{token, role:'pantalla'}, res=>{
+    if(!res.ok){ document.getElementById('main').innerHTML='<div class="waiting"><div class="big">Token inválido</div><p>Abrí esta pantalla como /pantalla.html?token=…</p></div>'; return; }
+    ACT=res.activities; current=res.current; revealed=res.revealed;
+    if(current) renderLive(res.agg); else renderWaiting(res.stats?res.stats.total:0);
+  });
+}
+socket.on('connect', staffJoin);
+
+function renderWaiting(n){
+  document.getElementById('main').innerHTML = `
+  <div class="waiting">
+    <div class="big">Sumate a la sala interactiva desde tu celular</div>
+    <div class="url">${location.host}</div>
+    <div class="counter"><b id="wN">${n??0}</b> personas ya están adentro</div>
+  </div>`;
+}
+
+function findAct(id){ return ACT.find(a=>a.id===id); }
+
+socket.on('activity', d=>{ current=d.activity; revealed=false; renderLive(null); });
+socket.on('results', d=>{ if(current && d.activityId===current.id) renderLive(d.agg, d.revealed); });
+socket.on('revealed', d=>{ revealed=true; if(current&&d.activityId===current.id){ current=d.activity; renderLive(d.agg,true);} });
+socket.on('idle', ()=>{ current=null; revealed=false; renderWaiting(lastTotal); });
+
+let lastTotal=0;
+socket.on('stats', s=>{
+  lastTotal=s.total;
+  document.getElementById('fConn').textContent = `${s.total} conectados · 🇦🇷 ${s.ar} · 🇬🇹 ${s.gt}`;
+  document.getElementById('fAR').textContent=s.scores.AR;
+  document.getElementById('fGT').textContent=s.scores.GT;
+  const w=document.getElementById('wN'); if(w) w.textContent=s.total;
+});
+
+function renderLive(agg, rev){
+  rev = rev ?? revealed;
+  const act=current;
+  let html=`<div class="bloque">${esc(act.bloque)}</div><h1>${esc(act.title)}</h1>`;
+  const total = agg? agg.total : 0;
+
+  if(!agg || (!rev && (act.type==='quiz'||act.type==='poll'))){
+    // antes del reveal: solo contador de respuestas (sin sesgar a la sala)
+    html += `<div class="waiting" style="flex:1">
+      <div class="counter">Respondé desde tu celular</div>
+      <div class="big" style="font-size:96px" id="liveN">${total}</div>
+      <div class="counter">respuestas recibidas</div></div>`;
+  }
+  else if(agg.type==='quiz'||agg.type==='poll'){
+    const opts = act.options || [];
+    const max=Math.max(1,...agg.counts);
+    html += `<div class="bars">` + agg.counts.map((n,i)=>`
+      <div class="brow">
+        <div class="lab"><span>${rev&&i===agg.correct?'✓ ':''}${esc(opts[i]??('Opción '+(i+1)))}</span>
+        <span class="r">${agg.total?Math.round(n/agg.total*100):0}%</span></div>
+        <div class="bar"><div class="${rev&&i===agg.correct?'c':''}" style="width:${Math.max(4,Math.round(n/max*100))}%">${n}</div></div>
+      </div>`).join('') + `</div>`;
+    if(rev && agg.explain) html += `<div class="explain">${esc(agg.explain)}</div>`;
+  }
+  else if(agg.type==='pollCountry'){
+    const opts = act.options || [];
+    const m=Math.max(1,...agg.AR,...agg.GT);
+    html += `<div class="split">
+      <div><h2>🇦🇷 Argentina</h2>${agg.AR.map((n,i)=>bar(opts[i],n,m)).join('')}</div>
+      <div><h2>🇬🇹 Guatemala</h2>${agg.GT.map((n,i)=>bar(opts[i],n,m)).join('')}</div>
+    </div>`;
+  }
+  else if(agg.type==='classify'){
+    html += `<table class="heat"><tr><th style="text-align:left">Infracción</th>${agg.categories.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>`;
+    html += agg.cards.map(c=>{
+      const row=agg.heat[c.id]; const tot=row.reduce((x,y)=>x+y,0)||1;
+      return `<tr><td class="lbl">${esc(c.text)}</td>${row.map((n,ci)=>{
+        const pct=Math.round(n/tot*100);
+        let bg = `rgba(59,100,145,${pct/130})`;
+        if(rev && ci===c.correct) bg=`rgba(46,125,79,${0.2+pct/120})`;
+        return `<td style="background:${bg}">${rev&&ci===c.correct?'✓ ':''}${pct}%</td>`;
+      }).join('')}</tr>`;
+    }).join('')+`</table>`;
+    if(rev && agg.explain) html += `<div class="explain">${esc(agg.explain)}</div>`;
+  }
+  else if(agg.type==='wordcloud'){
+    const max = Math.max(1,...agg.words.map(w=>w[1]));
+    html += `<div class="cloud">`+agg.words.map(([w,n],i)=>{
+      const size = 20 + Math.round(n/max*54);
+      return `<span style="font-size:${size}px;color:${i%3===0?'var(--dark)':i%3===1?'var(--band)':'#7a93ad'};font-weight:${n>1?'bold':'normal'}">${esc(w)}</span>`;
+    }).join('')+`</div><p style="text-align:center;color:#5a6b7d;font-size:18px">${total} palabras recibidas</p>`;
+  }
+  document.getElementById('main').innerHTML = html;
+}
+function bar(label,n,max){
+  return `<div class="brow"><div class="lab"><span>${esc(label)}</span><span class="r">${n}</span></div>
+  <div class="bar"><div style="width:${Math.max(4,Math.round(n/max*100))}%">${n}</div></div></div>`;
+}
+function esc(s){ return String(s??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+</script>
+</body>
+</html>

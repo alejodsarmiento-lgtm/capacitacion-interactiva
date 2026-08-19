@@ -1,0 +1,113 @@
+{
+  "activities": [
+    {
+      "id": "a1",
+      "type": "wordcloud",
+      "bloque": "Apertura",
+      "title": "¿Con qué palabra asociás el trabajo en casas particulares?",
+      "subtitle": "Escribí una sola palabra"
+    },
+    {
+      "id": "a2",
+      "type": "quiz",
+      "bloque": "Marco — Quiénes están alcanzados",
+      "title": "¿Cuál de estas personas está comprendida en el régimen de la Ley 26.844?",
+      "options": [
+        "El personal del consorcio del edificio",
+        "La cuidadora no terapéutica de una persona enferma",
+        "La enfermera profesional que asiste a domicilio",
+        "El chofer del vehículo particular de la familia"
+      ],
+      "correct": 1,
+      "explain": "El cuidado no terapéutico de personas enfermas o con discapacidad está comprendido. Los profesionales habilitados, los choferes y el personal del consorcio quedan fuera del régimen."
+    },
+    {
+      "id": "a3",
+      "type": "poll",
+      "bloque": "Legislación comparada",
+      "title": "En tu país, ¿es válida la denuncia laboral anónima?",
+      "options": ["Sí", "No", "No estoy seguro/a"],
+      "byCountry": true
+    },
+    {
+      "id": "a4",
+      "type": "quiz",
+      "bloque": "La denuncia",
+      "title": "Durante la visita, el empleador pregunta si hubo una denuncia. El inspector debe…",
+      "options": [
+        "Confirmarlo, porque el empleador tiene derecho a saberlo",
+        "Guardar secreto: no puede revelar que la visita obedece a una denuncia",
+        "Revelarlo solo si el empleador lo exige por escrito",
+        "Consultar primero a la trabajadora"
+      ],
+      "correct": 1,
+      "explain": "El origen de la denuncia es reservado. La reserva protege a la trabajadora, que en la mayoría de los casos sigue prestando tareas en ese mismo domicilio."
+    },
+    {
+      "id": "a5",
+      "type": "quiz",
+      "bloque": "Caso práctico — El domicilio inviolable",
+      "title": "Llegás al domicilio, te identificás, y el titular no permite el ingreso. ¿Qué corresponde hacer?",
+      "options": [
+        "Insistir hasta lograr el ingreso: el inspector puede entrar de día o de noche",
+        "Retirarse sin dejar constancia y reprogramar la visita",
+        "Labrar acta dejando constancia de la negativa y solicitar orden judicial de allanamiento",
+        "Llamar a la policía para forzar el ingreso en el acto"
+      ],
+      "correct": 2,
+      "explain": "La vivienda no es un local comercial: rige el art. 18 de la Constitución Nacional. El acta que documenta la negativa es precisamente lo que habilita a pedir la orden judicial, con auxilio de la fuerza pública si el juez lo otorga."
+    },
+    {
+      "id": "a6",
+      "type": "classify",
+      "bloque": "Régimen sancionatorio",
+      "title": "Ubicá cada infracción donde creés que corresponde",
+      "categories": ["Leve", "Grave", "Muy grave"],
+      "cards": [
+        { "id": "c1", "text": "Pago del sueldo con pocos días de atraso", "correct": 0 },
+        { "id": "c2", "text": "Incumplimiento meramente formal o documental", "correct": 0 },
+        { "id": "c3", "text": "Registrarla por menos horas de las que trabaja", "correct": 1 },
+        { "id": "c4", "text": "No entregar el recibo de sueldo firmado", "correct": 1 },
+        { "id": "c5", "text": "Superar la jornada máxima legal", "correct": 1 },
+        { "id": "c6", "text": "Pagar por debajo de la escala mínima", "correct": 1 },
+        { "id": "c7", "text": "Tener a la trabajadora sin registrar", "correct": 2 },
+        { "id": "c8", "text": "Ocupar a una persona menor de dieciséis años", "correct": 2 },
+        { "id": "c9", "text": "Actos contrarios a la intimidad y dignidad de la trabajadora", "correct": 2 }
+      ],
+      "explain": "Leves: hasta 150% del SMVM. Graves: hasta 200% por cada trabajadora afectada. Muy graves: hasta 2.000% por cada trabajadora afectada."
+    },
+    {
+      "id": "a7",
+      "type": "quiz",
+      "bloque": "Qué se controla",
+      "title": "¿Cuál es el tope de la jornada semanal en casas particulares?",
+      "options": ["40 horas", "44 horas", "45 horas", "48 horas"],
+      "correct": 3,
+      "explain": "La jornada no puede superar las 8 horas diarias ni las 48 semanales. El descanso semanal es de 35 horas corridas desde el sábado a las 13."
+    },
+    {
+      "id": "a8",
+      "type": "poll",
+      "bloque": "Legislación comparada — Convenio 189 OIT",
+      "title": "En tu país, ¿un inspector puede ingresar a una vivienda particular sin orden judicial?",
+      "options": ["Sí, siempre", "Solo con consentimiento del titular", "Nunca", "No estoy seguro/a"],
+      "byCountry": true
+    },
+    {
+      "id": "a9",
+      "type": "quiz",
+      "bloque": "Régimen sancionatorio",
+      "title": "La multa por una infracción muy grave puede llegar, por cada trabajadora afectada, hasta el…",
+      "options": ["150% del SMVM", "200% del SMVM", "1.000% del SMVM", "2.000% del SMVM"],
+      "correct": 3,
+      "explain": "Y obstruir la inspección tiene su propia escala, que llega al 5.000% del salario mínimo, vital y móvil."
+    },
+    {
+      "id": "a10",
+      "type": "wordcloud",
+      "bloque": "Cierre",
+      "title": "Después de estas tres horas: ¿con qué palabra te quedás?",
+      "subtitle": "Una sola palabra"
+    }
+  ]
+}

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel del disertante · MTPBA</title>
+<style>
+  :root{ --dark:#2E4D6B; --band:#3B6491; --light:#DCE6F1; --gray:#F2F2F2; --border:#B7C2CD;
+         --ok:#2e7d4f; --warn:#b98a00; --bad:#b3402a; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,Helvetica,sans-serif;background:var(--gray);color:#1c2b3a}
+  header{background:var(--dark);color:#fff;padding:10px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  header b{font-size:15px}
+  .pill{background:var(--band);border-radius:20px;padding:5px 14px;font-size:13px;margin-left:8px}
+  .wrap{display:grid;grid-template-columns:340px 1fr 300px;gap:14px;padding:14px;max-width:1500px;margin:0 auto}
+  @media(max-width:1100px){.wrap{grid-template-columns:1fr}}
+  .col{display:flex;flex-direction:column;gap:12px}
+  .card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px}
+  h3{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--band);margin-bottom:10px}
+  .act{border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:.12s;background:#fff}
+  .act:hover{background:var(--light)}
+  .act.on{border-color:var(--band);background:#c9d9ec}
+  .act .bl{font-size:10.5px;text-transform:uppercase;color:var(--band);font-weight:bold}
+  .act .ti{font-size:13.5px;line-height:1.3;margin-top:2px}
+  .act .ty{font-size:11px;color:#5a6b7d;margin-top:3px}
+  button.big{width:100%;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:bold;cursor:pointer;font-family:inherit;margin-bottom:8px}
+  .b1{background:var(--dark);color:#fff}
+  .b2{background:var(--ok);color:#fff}
+  .b3{background:#8a9bac;color:#fff}
+  button.big:disabled{opacity:.4;cursor:default}
+  .stat-row{display:flex;gap:10px;text-align:center}
+  .stat{flex:1;background:var(--light);border-radius:8px;padding:10px 4px}
+  .stat .n{font-size:24px;font-weight:bold;color:var(--dark)}
+  .stat .l{font-size:11px;color:#5a6b7d}
+  .bar-row{margin-bottom:10px}
+  .bar-row .lab{font-size:13px;margin-bottom:3px;display:flex;justify-content:space-between}
+  .bar{height:16px;background:var(--light);border-radius:8px;overflow:hidden}
+  .bar>div{height:100%;background:var(--band);border-radius:8px;transition:width .3s}
+  .bar>div.c{background:var(--ok)}
+  .sem-dots{display:flex;gap:8px;align-items:center;font-size:14px}
+  .dot{width:14px;height:14px;border-radius:50%;display:inline-block;margin-right:4px}
+  .qrow{border-bottom:1px solid var(--gray);padding:8px 0;font-size:13px}
+  .qrow .meta{font-size:11px;color:#5a6b7d;margin:2px 0 4px}
+  .qrow button{font-size:11.5px;border:1px solid var(--border);background:var(--light);border-radius:6px;padding:3px 8px;cursor:pointer;margin-right:6px}
+  .login{max-width:380px;margin:80px auto;background:#fff;border:1px solid var(--border);border-radius:10px;padding:24px}
+  .login input{width:100%;border:2px solid var(--border);border-radius:8px;padding:12px;font-size:15px;margin:10px 0}
+  .duelbox{display:flex;justify-content:space-around;font-size:20px;font-weight:bold;color:var(--dark)}
+  .heat{width:100%;border-collapse:collapse;font-size:12px}
+  .heat td,.heat th{border:1px solid var(--border);padding:5px 6px;text-align:center}
+  .heat td.lbl{text-align:left;font-size:11.5px}
+  a.exp{display:block;text-align:center;background:var(--light);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--dark);font-weight:bold;text-decoration:none;font-size:14px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io({transports:['websocket','polling']});
+let token=null, ACT=[], currentId=null, revealed=false;
+
+function renderLogin(){
+  document.getElementById('app').innerHTML = `
+  <div class="login">
+    <h3>Panel del disertante</h3>
+    <p style="font-size:13px;color:#5a6b7d">Ingresá el token de administración.</p>
+    <input type="password" id="tok" placeholder="Token">
+    <button class="big b1" onclick="login()">Ingresar</button>
+    <div id="err" style="color:var(--bad);font-size:13px"></div>
+  </div>`;
+}
+function login(){
+  token = document.getElementById('tok').value.trim();
+  staffJoin();
+}
+function staffJoin(){
+  socket.emit('staffJoin', {token, role:'admin'}, res=>{
+    if(!res.ok){ const e=document.getElementById('err'); if(e)e.textContent='Token inválido'; return; }
+    ACT = res.activities; currentId = res.current?res.current.id:null; revealed = res.revealed;
+    renderApp(res);
+    if(res.agg) renderResults({activityId:currentId, agg:res.agg, revealed});
+    renderStats(res.stats); renderSem(res.semaforo); renderQs(res.questions);
+  });
+}
+socket.on('connect', ()=>{ if(token) staffJoin(); });
+
+function renderApp(res){
+  document.getElementById('app').innerHTML = `
+  <header>
+    <b>Panel del disertante — Inspección en casas particulares</b>
+    <div><span class="pill" id="pillConn">— conectados</span><span class="pill" id="pillCur">Sin actividad</span></div>
+  </header>
+  <div class="wrap">
+    <div class="col">
+      <div class="card"><h3>Guion de actividades</h3><div id="actList"></div></div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <h3>Control</h3>
+        <button class="big b2" id="btnReveal" onclick="reveal()" disabled>Revelar resultados</button>
+        <button class="big b3" onclick="idle()">Cerrar actividad (volver a espera)</button>
+      </div>
+      <div class="card"><h3>Resultados en vivo</h3><div id="results"><p style="font-size:14px;color:#5a6b7d">Activá una actividad para ver las respuestas llegar en tiempo real.</p></div></div>
+    </div>
+    <div class="col">
+      <div class="card"><h3>Sala</h3>
+        <div class="stat-row">
+          <div class="stat"><div class="n" id="sTot">0</div><div class="l">Conectados</div></div>
+          <div class="stat"><div class="n" id="sAR">0</div><div class="l">🇦🇷</div></div>
+          <div class="stat"><div class="n" id="sGT">0</div><div class="l">🇬🇹</div></div>
+        </div>
+        <div style="margin-top:12px"><h3>Duelo por país</h3><div class="duelbox"><span>🇦🇷 <span id="dAR">0</span></span><span>🇬🇹 <span id="dGT">0</span></span></div></div>
+      </div>
+      <div class="card"><h3>Semáforo de ritmo</h3><div id="semBox" style="font-size:14px">—</div></div>
+      <div class="card"><h3>Preguntas (por votos)</h3><div id="qBox" style="max-height:300px;overflow-y:auto">—</div></div>
+      <div class="card"><a class="exp" id="expLink" href="#" target="_blank">⬇ Exportar resultados (CSV)</a></div>
+    </div>
+  </div>`;
+  document.getElementById('expLink').href = '/export.csv?token='+encodeURIComponent(token);
+  renderActList();
+}
+
+function renderActList(){
+  document.getElementById('actList').innerHTML = ACT.map(a=>`
+    <div class="act ${a.id===currentId?'on':''}" onclick="start('${a.id}')">
+      <div class="bl">${esc(a.bloque)}</div>
+      <div class="ti">${esc(a.title)}</div>
+      <div class="ty">${({quiz:'Quiz con puntaje',poll:'Encuesta',classify:'Clasificación de infracciones',wordcloud:'Nube de palabras'})[a.type]||a.type}</div>
+    </div>`).join('');
+  document.getElementById('pillCur').textContent = currentId ? ('En curso: '+currentId.toUpperCase()) : 'Sin actividad';
+  const br=document.getElementById('btnReveal'); if(br) br.disabled = !currentId || revealed;
+}
+
+function start(id){
+  socket.emit('admin:start', id, res=>{
+    if(res.ok){ currentId=id; revealed=false; renderActList(); }
+  });
+}
+function reveal(){ socket.emit('admin:reveal', ()=>{ revealed=true; renderActList(); }); }
+function idle(){ socket.emit('admin:idle', ()=>{ currentId=null; revealed=false; renderActList();
+  document.getElementById('results').innerHTML='<p style="font-size:14px;color:#5a6b7d">Sala en espera.</p>'; }); }
+
+socket.on('results', renderResults);
+socket.on('revealed', d=>{ revealed=true; renderActList(); renderResults({activityId:d.activityId, agg:d.agg, revealed:true}); });
+socket.on('stats', renderStats);
+socket.on('semaforo', renderSem);
+socket.on('questions', renderQs);
+
+function renderResults(d){
+  if(!d.agg) return;
+  const el=document.getElementById('results'); if(!el) return;
+  const agg=d.agg;
+  let html=`<p style="font-size:13px;color:#5a6b7d;margin-bottom:10px"><b>${agg.total}</b> respuestas recibidas ${d.revealed?'· <b style="color:var(--ok)">REVELADO</b>':'· en vivo (solo vos lo ves)'}</p>`;
+  if(agg.type==='quiz'||agg.type==='poll'){
+    const act = ACT.find(a=>a.id===d.activityId);
+    const max=Math.max(1,...agg.counts);
+    html += agg.counts.map((n,i)=>`
+      <div class="bar-row">
+        <div class="lab"><span>${i===agg.correct?'✓ ':''}Opción ${i+1}</span><span>${n} (${agg.total?Math.round(n/agg.total*100):0}%)</span></div>
+        <div class="bar"><div class="${i===agg.correct?'c':''}" style="width:${Math.round(n/max*100)}%"></div></div>
+      </div>`).join('');
+  } else if(agg.type==='pollCountry'){
+    html += agg.AR.map((_,i)=>{
+      const a=agg.AR[i],g=agg.GT[i],m=Math.max(1,...agg.AR,...agg.GT);
+      return `<div class="bar-row"><div class="lab"><span>Opción ${i+1}</span><span>🇦🇷 ${a} · 🇬🇹 ${g}</span></div>
+      <div class="bar"><div style="width:${Math.round(a/m*100)}%"></div></div>
+      <div class="bar" style="margin-top:2px"><div class="c" style="width:${Math.round(g/m*100)}%"></div></div></div>`;
+    }).join('');
+  } else if(agg.type==='classify'){
+    html += `<table class="heat"><tr><th style="text-align:left">Infracción</th>${agg.categories.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>`;
+    html += agg.cards.map(c=>{
+      const row=agg.heat[c.id]; const tot=row.reduce((x,y)=>x+y,0)||1;
+      return `<tr><td class="lbl">${esc(c.text)}</td>${row.map((n,ci)=>{
+        const pct=Math.round(n/tot*100);
+        const bg = ci===c.correct ? `rgba(46,125,79,${0.15+pct/130})` : `rgba(59,100,145,${pct/140})`;
+        return `<td style="background:${bg}">${n}<br><small>${pct}%</small></td>`;
+      }).join('')}</tr>`;
+    }).join('') + `</table>`;
+  } else if(agg.type==='wordcloud'){
+    html += agg.words.map(([w,n])=>`<span style="display:inline-block;background:var(--light);border-radius:14px;padding:4px 10px;margin:3px;font-size:${12+Math.min(10,n*2)}px">${esc(w)} <b>${n}</b></span>`).join('');
+  }
+  el.innerHTML=html;
+}
+
+function renderStats(s){
+  if(!document.getElementById('sTot')) return;
+  document.getElementById('sTot').textContent=s.total;
+  document.getElementById('sAR').textContent=s.ar;
+  document.getElementById('sGT').textContent=s.gt;
+  document.getElementById('dAR').textContent=s.scores.AR;
+  document.getElementById('dGT').textContent=s.scores.GT;
+  document.getElementById('pillConn').textContent=s.total+' conectados';
+}
+function renderSem(s){
+  const el=document.getElementById('semBox'); if(!el) return;
+  const c=s.colors, tot=(c.verde+c.amarillo+c.rojo)||0;
+  if(!tot){ el.innerHTML='<span style="color:#5a6b7d">Sin señales todavía.</span>'; return; }
+  el.innerHTML = `
+   <div class="sem-dots"><span class="dot" style="background:#4caf7d"></span>${c.verde}
+   <span class="dot" style="background:#f2c94c;margin-left:10px"></span>${c.amarillo}
+   <span class="dot" style="background:#e57358;margin-left:10px"></span>${c.rojo}</div>
+   ${c.rojo>tot*0.3?'<p style="color:var(--bad);font-size:12.5px;margin-top:8px"><b>⚠ Más del 30% en rojo:</b> conviene frenar y recapitular.</p>':''}
+   ${s.byRol&&Object.keys(s.byRol).length?'<p style="font-size:11.5px;color:#5a6b7d;margin-top:8px">'+Object.entries(s.byRol).map(([r,v])=>`${r}: 🟢${v.verde} 🟡${v.amarillo} 🔴${v.rojo}`).join(' · ')+'</p>':''}`;
+}
+function renderQs(list){
+  const el=document.getElementById('qBox'); if(!el) return;
+  el.innerHTML = list.length? list.map(q=>`
+    <div class="qrow" style="${q.answered?'opacity:.45':''}">
+      <b>▲ ${q.votes}</b> ${esc(q.text)}
+      <div class="meta">${q.pais==='AR'?'🇦🇷':'🇬🇹'} ${esc(q.autor)}</div>
+      ${q.answered?'':`<button onclick="socket.emit('admin:answerQuestion',${q.id})">Marcar respondida</button>`}
+    </div>`).join('') : '<span style="color:#5a6b7d;font-size:13px">Sin preguntas todavía.</span>';
+}
+function esc(s){ return String(s??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+renderLogin();
+</script>
+</body>
+</html>

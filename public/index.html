@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Capacitación · Inspección en casas particulares</title>
+<style>
+  :root{
+    --dark:#2E4D6B; --band:#3B6491; --light:#DCE6F1; --gray:#F2F2F2; --border:#B7C2CD;
+    --ok:#2e7d4f; --warn:#b98a00; --bad:#b3402a;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent}
+  body{font-family:Arial, Helvetica, sans-serif; background:var(--gray); color:#1c2b3a; min-height:100vh; display:flex; flex-direction:column}
+  header{background:var(--band); color:#fff; padding:10px 14px; position:sticky; top:0; z-index:10}
+  header .t1{font-size:11px; letter-spacing:.06em; text-transform:uppercase; opacity:.85}
+  header .t2{font-size:15px; font-weight:bold}
+  main{flex:1; padding:14px; max-width:560px; width:100%; margin:0 auto; padding-bottom:130px}
+  .card{background:#fff; border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:12px}
+  .bloque{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--band); font-weight:bold; margin-bottom:6px}
+  h2{font-size:18px; color:var(--dark); margin-bottom:12px; line-height:1.3}
+  .hint{font-size:13px; color:#5a6b7d; margin-bottom:10px}
+  button{font-family:inherit; cursor:pointer}
+  .opt{display:block; width:100%; text-align:left; background:var(--light); border:2px solid var(--border);
+       border-radius:8px; padding:13px 14px; font-size:15px; margin-bottom:9px; color:#1c2b3a; transition:.12s}
+  .opt:active{transform:scale(.985)}
+  .opt.sel{border-color:var(--band); background:#c9d9ec; font-weight:bold}
+  .opt.correct{border-color:var(--ok); background:#dff0e5}
+  .opt.wrong{border-color:var(--bad); background:#f6e0da}
+  .opt[disabled]{opacity:.9; cursor:default}
+  .send{width:100%; background:var(--dark); color:#fff; border:none; border-radius:8px; padding:14px; font-size:16px; font-weight:bold; margin-top:4px}
+  .send[disabled]{opacity:.45}
+  input[type=text]{width:100%; border:2px solid var(--border); border-radius:8px; padding:12px; font-size:16px; font-family:inherit}
+  select{width:100%; border:2px solid var(--border); border-radius:8px; padding:12px; font-size:16px; background:#fff; font-family:inherit}
+  label{display:block; font-size:13px; font-weight:bold; color:var(--dark); margin:12px 0 5px}
+  .pais-row{display:flex; gap:8px}
+  .pais-row button{flex:1; padding:13px; border-radius:8px; border:2px solid var(--border); background:var(--light); font-size:16px}
+  .pais-row button.sel{border-color:var(--band); background:#c9d9ec; font-weight:bold}
+  .status{text-align:center; padding:26px 10px; color:#5a6b7d; font-size:15px; line-height:1.5}
+  .badge-ok{display:inline-block; background:#dff0e5; color:var(--ok); border-radius:20px; padding:6px 14px; font-weight:bold; font-size:14px}
+  .explain{background:var(--light); border-left:4px solid var(--band); padding:10px 12px; font-size:14px; border-radius:0 8px 8px 0; margin-top:10px; line-height:1.4}
+  /* classify */
+  .ccard{border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:10px; background:#fff}
+  .ccard .txt{font-size:14px; margin-bottom:8px; line-height:1.3}
+  .seg{display:flex; gap:6px}
+  .seg button{flex:1; padding:9px 4px; font-size:12.5px; border-radius:7px; border:2px solid var(--border); background:var(--gray)}
+  .seg button.s0.sel{background:#fff3cd; border-color:var(--warn); font-weight:bold}
+  .seg button.s1.sel{background:#ffe0b3; border-color:#c77400; font-weight:bold}
+  .seg button.s2.sel{background:#f6d0c6; border-color:var(--bad); font-weight:bold}
+  .ccard.rev-ok{border-color:var(--ok); background:#f2faf5}
+  .ccard.rev-bad{border-color:var(--bad); background:#fdf3f0}
+  .rev-tag{font-size:12px; font-weight:bold; margin-top:6px}
+  /* barra inferior */
+  .bottom{position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--border); z-index:20}
+  .tabs{display:flex}
+  .tabs button{flex:1; padding:9px 4px 7px; border:none; background:#fff; font-size:12px; color:#5a6b7d; border-top:3px solid transparent}
+  .tabs button.on{color:var(--dark); font-weight:bold; border-top-color:var(--band)}
+  .sem{display:flex; gap:10px; justify-content:center; padding:9px 14px 12px}
+  .sem span{font-size:12.5px; color:#5a6b7d; align-self:center; margin-right:2px}
+  .sem button{width:44px; height:44px; border-radius:50%; border:3px solid var(--border); font-size:19px; background:var(--gray)}
+  .sem button.v.on{background:#4caf7d; border-color:var(--ok)}
+  .sem button.a.on{background:#f2c94c; border-color:var(--warn)}
+  .sem button.r.on{background:#e57358; border-color:var(--bad)}
+  /* preguntas */
+  .qpanel{max-height:46vh; overflow-y:auto; padding:12px 14px; border-top:1px solid var(--border)}
+  .qrow{display:flex; gap:10px; align-items:flex-start; border-bottom:1px solid var(--gray); padding:9px 0}
+  .qrow .vt{min-width:46px; text-align:center; border:2px solid var(--border); border-radius:8px; padding:5px 0; font-size:13px; background:var(--light); font-weight:bold; color:var(--dark)}
+  .qrow .tx{font-size:14px; line-height:1.35}
+  .qrow .meta{font-size:11.5px; color:#5a6b7d; margin-top:2px}
+  .qrow.ans{opacity:.5}
+  .qform{display:flex; gap:8px; padding:10px 14px; border-top:1px solid var(--gray)}
+  .qform input{flex:1}
+  .qform button{background:var(--dark); color:#fff; border:none; border-radius:8px; padding:0 16px; font-weight:bold}
+  .duel{display:flex; justify-content:center; gap:18px; font-size:14px; padding:8px 0 0; color:var(--dark); font-weight:bold}
+  .toast{position:fixed; top:64px; left:50%; transform:translateX(-50%); background:var(--dark); color:#fff; padding:9px 18px; border-radius:20px; font-size:14px; z-index:50; opacity:0; transition:.25s; pointer-events:none}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <div class="t1">Ministerio de Trabajo PBA · Argentina — Guatemala</div>
+  <div class="t2">Inspección del trabajo en casas particulares</div>
+</header>
+
+<main id="main"></main>
+
+<div class="bottom" id="bottom" style="display:none">
+  <div class="tabs">
+    <button id="tabSem" class="on" onclick="showTab('sem')">🚦 ¿Cómo venís?</button>
+    <button id="tabQ" onclick="showTab('q')">💬 Preguntas <span id="qCount"></span></button>
+  </div>
+  <div id="panelSem">
+    <div class="sem">
+      <span>Marcá tu ritmo:</span>
+      <button class="v" id="semV" onclick="setSem('verde')">🟢</button>
+      <button class="a" id="semA" onclick="setSem('amarillo')">🟡</button>
+      <button class="r" id="semR" onclick="setSem('rojo')">🔴</button>
+    </div>
+  </div>
+  <div id="panelQ" style="display:none">
+    <div class="qpanel" id="qList"></div>
+    <div class="qform">
+      <input type="text" id="qText" maxlength="240" placeholder="Escribí tu pregunta…">
+      <button onclick="sendQuestion()">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io({transports:['websocket','polling']});
+const main = document.getElementById('main');
+let me = null, current = null, myAnswer = null, sent = false, classifyState = {};
+
+// ---------- Registro ----------
+function renderJoin(){
+  main.innerHTML = `
+  <div class="card">
+    <div class="bloque">Bienvenido / Bienvenida</div>
+    <h2>Sumate a la sala interactiva</h2>
+    <label>Tu nombre</label>
+    <input type="text" id="jNombre" maxlength="40" placeholder="Nombre y apellido">
+    <label>País</label>
+    <div class="pais-row">
+      <button id="pAR" onclick="pickPais('AR')">🇦🇷 Argentina</button>
+      <button id="pGT" onclick="pickPais('GT')">🇬🇹 Guatemala</button>
+    </div>
+    <label>Tu rol</label>
+    <select id="jRol">
+      <option value="inspector">Inspector / Inspectora</option>
+      <option value="funcionario">Funcionario / Funcionaria</option>
+      <option value="abogado">Abogado / Abogada</option>
+      <option value="otro">Otro</option>
+    </select>
+    <button class="send" style="margin-top:16px" onclick="join()">Ingresar</button>
+  </div>`;
+}
+let paisSel = null;
+function pickPais(p){
+  paisSel = p;
+  document.getElementById('pAR').classList.toggle('sel', p==='AR');
+  document.getElementById('pGT').classList.toggle('sel', p==='GT');
+}
+function join(){
+  const nombre = document.getElementById('jNombre').value.trim();
+  const rol = document.getElementById('jRol').value;
+  if(!nombre) return toast('Escribí tu nombre');
+  if(!paisSel) return toast('Elegí tu país');
+  socket.emit('join', {nombre, pais:paisSel, rol}, res=>{
+    if(!res.ok) return toast(res.error||'Error');
+    me = {nombre, pais:paisSel, rol};
+    try{ sessionStorage.setItem('me', JSON.stringify(me)); }catch(e){}
+    document.getElementById('bottom').style.display='block';
+    renderQuestions(res.questions||[]);
+    if(res.current){ current = res.current; sent=false; myAnswer=null; classifyState={};
+      if(res.revealed && res.agg) renderRevealed(res.current, res.agg);
+      else renderActivity(res.current);
+    } else renderIdle();
+  });
+}
+
+// reconexión automática con la misma identidad
+socket.on('connect', ()=>{
+  if(me){
+    socket.emit('join', me, res=>{
+      if(res && res.ok){
+        if(res.current){ current=res.current;
+          if(res.revealed && res.agg) renderRevealed(res.current,res.agg); else renderActivity(res.current);
+        } else renderIdle();
+      }
+    });
+  }
+});
+
+function renderIdle(scores){
+  current=null;
+  main.innerHTML = `
+  <div class="card status">
+    <span class="badge-ok">✓ Estás en la sala</span>
+    <p style="margin-top:14px">Seguí la presentación en Webex.<br>Cuando se abra una actividad, va a aparecer acá automáticamente.</p>
+    ${scores?duelHtml(scores):''}
+  </div>`;
+}
+function duelHtml(s){
+  return `<div class="duel"><span>🇦🇷 ${s.AR||0}</span><span>·</span><span>🇬🇹 ${s.GT||0}</span></div>`;
+}
+
+// ---------- Actividades ----------
+function renderActivity(act){
+  sent=false; myAnswer=null; classifyState={};
+  let inner = `<div class="bloque">${esc(act.bloque)}</div><h2>${esc(act.title)}</h2>`;
+  if(act.type==='quiz' || act.type==='poll'){
+    inner += act.options.map((o,i)=>`<button class="opt" id="opt${i}" onclick="pickOpt(${i})">${esc(o)}</button>`).join('');
+    inner += `<button class="send" id="btnSend" disabled onclick="sendAnswer()">Enviar respuesta</button>`;
+  } else if(act.type==='wordcloud'){
+    inner += `<div class="hint">${esc(act.subtitle||'')}</div>
+      <input type="text" id="wcInput" maxlength="24" placeholder="Una palabra…">
+      <button class="send" id="btnSend" onclick="sendWord()">Enviar</button>`;
+  } else if(act.type==='classify'){
+    inner += `<div class="hint">Tocá la categoría que creés correcta para cada infracción.</div>`;
+    inner += act.cards.map(c=>`
+      <div class="ccard" id="cc_${c.id}">
+        <div class="txt">${esc(c.text)}</div>
+        <div class="seg">
+          ${act.categories.map((cat,ci)=>`<button class="s${ci}" id="cc_${c.id}_${ci}" onclick="pickCat('${c.id}',${ci})">${esc(cat)}</button>`).join('')}
+        </div>
+      </div>`).join('');
+    inner += `<button class="send" id="btnSend" disabled onclick="sendClassify()">Enviar clasificación</button>`;
+  }
+  main.innerHTML = `<div class="card">${inner}</div>`;
+  window.scrollTo(0,0);
+}
+
+function pickOpt(i){
+  if(sent) return;
+  myAnswer = i;
+  current.options.forEach((_,j)=>document.getElementById('opt'+j).classList.toggle('sel', j===i));
+  document.getElementById('btnSend').disabled = false;
+}
+function sendAnswer(){
+  if(myAnswer===null||sent) return;
+  lockSend();
+  socket.emit('respond', {activityId:current.id, value:myAnswer}, res=>{
+    if(res.ok){ toast('Respuesta enviada ✓'); }
+    else { unlockSend(); toast(res.error||'Error'); }
+  });
+}
+function sendWord(){
+  const w = document.getElementById('wcInput').value.trim();
+  if(!w) return toast('Escribí una palabra');
+  lockSend();
+  socket.emit('respond', {activityId:current.id, value:w}, res=>{
+    if(res.ok) toast('¡Enviada! ✓'); else { unlockSend(); toast(res.error||'Error'); }
+  });
+}
+function pickCat(cardId, ci){
+  if(sent) return;
+  classifyState[cardId]=ci;
+  current.cards.forEach(c=>{
+    if(c.id!==cardId) return;
+    current.categories.forEach((_,j)=>{
+      document.getElementById(`cc_${cardId}_${j}`).classList.toggle('sel', j===ci);
+    });
+  });
+  document.getElementById('btnSend').disabled = Object.keys(classifyState).length < current.cards.length;
+}
+function sendClassify(){
+  lockSend();
+  socket.emit('respond', {activityId:current.id, value:classifyState}, res=>{
+    if(res.ok) toast('Clasificación enviada ✓'); else { unlockSend(); toast(res.error||'Error'); }
+  });
+}
+function lockSend(){ sent=true; const b=document.getElementById('btnSend'); if(b){b.disabled=true;b.textContent='Enviado ✓';} }
+function unlockSend(){ sent=false; const b=document.getElementById('btnSend'); if(b){b.disabled=false;} }
+
+// ---------- Reveal ----------
+function renderRevealed(act, agg, scores){
+  let inner = `<div class="bloque">${esc(act.bloque)} — Resultados</div><h2>${esc(act.title)}</h2>`;
+  if(agg.type==='quiz'||agg.type==='poll'){
+    const max = Math.max(1,...agg.counts);
+    inner += act.options.map((o,i)=>{
+      const pct = agg.total? Math.round(agg.counts[i]/agg.total*100):0;
+      let cls='opt'; 
+      if(agg.correct!==undefined && agg.correct!==null){
+        if(i===agg.correct) cls+=' correct';
+        else if(myAnswer===i) cls+=' wrong';
+      } else if(myAnswer===i) cls+=' sel';
+      return `<button class="${cls}" disabled>
+        ${esc(o)}<br><small>${agg.counts[i]} respuestas · ${pct}%</small>
+        <div style="height:6px;background:${i===agg.correct?'#4caf7d':'#9db3c9'};width:${Math.round(agg.counts[i]/max*100)}%;border-radius:3px;margin-top:5px"></div>
+      </button>`;
+    }).join('');
+    if(agg.explain) inner += `<div class="explain">${esc(agg.explain)}</div>`;
+  }
+  else if(agg.type==='pollCountry'){
+    inner += `<div class="hint">Respuestas por país</div>`;
+    inner += act.options.map((o,i)=>{
+      const a=agg.AR[i]||0, g=agg.GT[i]||0;
+      return `<div style="margin-bottom:12px"><b style="font-size:14px">${esc(o)}</b>
+        <div style="font-size:13px;margin-top:3px">🇦🇷 ${a} &nbsp;·&nbsp; 🇬🇹 ${g}</div></div>`;
+    }).join('');
+  }
+  else if(agg.type==='classify'){
+    inner += act.cards.map(c=>{
+      const mine = classifyState[c.id];
+      const ok = mine===c.correct;
+      return `<div class="ccard ${mine!==undefined?(ok?'rev-ok':'rev-bad'):''}">
+        <div class="txt">${esc(c.text)}</div>
+        <div class="rev-tag" style="color:${ok?'var(--ok)':'var(--bad)'}">
+          ${mine!==undefined ? (ok?'✓ Correcto':'✗') : ''} Respuesta: <b>${esc(agg.categories[c.correct])}</b>
+        </div>
+      </div>`;
+    }).join('');
+    if(agg.explain) inner += `<div class="explain">${esc(agg.explain)}</div>`;
+  }
+  else if(agg.type==='wordcloud'){
+    inner += `<div style="text-align:center;padding:10px 0">` + agg.words.map(([w,n],i)=>{
+      const size = 13 + Math.min(22, n*4);
+      return `<span style="font-size:${size}px;color:${i%2?'var(--band)':'var(--dark)'};margin:4px 6px;display:inline-block;font-weight:${n>1?'bold':'normal'}">${esc(w)}</span>`;
+    }).join('') + `</div>`;
+  }
+  if(scores) inner += duelHtml(scores);
+  main.innerHTML = `<div class="card">${inner}</div>`;
+}
+
+// ---------- Sockets entrantes ----------
+socket.on('activity', d=>{ current=d.activity; renderActivity(d.activity); });
+socket.on('revealed', d=>{ if(current&&d.activityId===current.id){ renderRevealed(d.activity, d.agg, d.scores); } });
+socket.on('results', d=>{ /* participantes solo ven resultados tras reveal */ });
+socket.on('idle', d=>{ renderIdle(d.scores); });
+socket.on('questions', renderQuestions);
+
+// ---------- Semáforo ----------
+let semCur=null;
+function setSem(c){
+  semCur=c;
+  socket.emit('semaforo', c);
+  document.getElementById('semV').classList.toggle('on', c==='verde');
+  document.getElementById('semA').classList.toggle('on', c==='amarillo');
+  document.getElementById('semR').classList.toggle('on', c==='rojo');
+}
+
+// ---------- Preguntas ----------
+function showTab(t){
+  document.getElementById('tabSem').classList.toggle('on', t==='sem');
+  document.getElementById('tabQ').classList.toggle('on', t==='q');
+  document.getElementById('panelSem').style.display = t==='sem'?'block':'none';
+  document.getElementById('panelQ').style.display = t==='q'?'block':'none';
+}
+function sendQuestion(){
+  const inp=document.getElementById('qText');
+  const text=inp.value.trim();
+  if(text.length<5) return toast('Escribí tu pregunta completa');
+  socket.emit('question',{text},res=>{
+    if(res.ok){ inp.value=''; toast('Pregunta enviada ✓'); }
+    else toast(res.error||'Error');
+  });
+}
+function renderQuestions(list){
+  document.getElementById('qCount').textContent = list.length? `(${list.filter(q=>!q.answered).length})` : '';
+  const el=document.getElementById('qList');
+  if(!el) return;
+  el.innerHTML = list.length? list.map(q=>`
+    <div class="qrow ${q.answered?'ans':''}">
+      <button class="vt" onclick="socket.emit('voteQuestion',${q.id})">▲ ${q.votes}</button>
+      <div><div class="tx">${esc(q.text)}</div>
+      <div class="meta">${q.pais==='AR'?'🇦🇷':'🇬🇹'} ${esc(q.autor)} ${q.answered?'· respondida':''}</div></div>
+    </div>`).join('') : '<div class="status" style="padding:14px">Todavía no hay preguntas. ¡Hacé la primera!</div>';
+}
+
+// ---------- util ----------
+function esc(s){ return String(s??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+let toastT=null;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200);
+}
+renderJoin();
+</script>
+</body>
+</html>
