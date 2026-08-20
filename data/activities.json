@@ -107,17 +107,21 @@
     },
     {
       "id": "c1",
-      "type": "quiz",
+      "type": "classify",
       "bloque": "El entorno de trabajo y el de descanso",
-      "title": "Para la trabajadora sin retiro, el descanso que la ley garantiza es…",
-      "options": [
-        "8 horas de reposo nocturno y 1 hora entre las tareas de la mañana y la tarde",
-        "9 horas consecutivas de reposo nocturno y 3 horas continuas entre la mañana y la tarde",
-        "10 horas de reposo nocturno, sin pausa entre turnos",
-        "No está reglado: se pacta con el empleador"
+      "title": "«La casa es, al mismo tiempo, vivienda de una familia y lugar de trabajo de una persona.» ¿Verdadero o falso?",
+      "categories": ["Verdadero", "Falso"],
+      "cards": [
+        { "id": "v1", "text": "La ropa y los elementos de trabajo los debe proveer el empleador", "correct": 0 },
+        { "id": "v2", "text": "Las condiciones de salud, seguridad e higiene son responsabilidad de quien trabaja", "correct": 1 },
+        { "id": "v3", "text": "El reposo nocturno de quien duerme en el lugar es de 9 horas consecutivas", "correct": 0 },
+        { "id": "v4", "text": "Ese reposo puede interrumpirse por cualquier necesidad de la familia", "correct": 1 },
+        { "id": "v5", "text": "Entre las tareas de la mañana y las de la tarde corresponden 3 horas continuas de descanso", "correct": 0 },
+        { "id": "v6", "text": "La habitación puede compartirse con otros miembros del hogar si está amueblada e higiénica", "correct": 1 },
+        { "id": "v7", "text": "La alimentación comprende desayuno, almuerzo, merienda y cena", "correct": 0 },
+        { "id": "v8", "text": "Contratar una aseguradora de riesgos del trabajo es optativo para el empleador", "correct": 1 }
       ],
-      "correct": 1,
-      "explain": "Reposo nocturno de 9 horas consecutivas, interrumpible solo por causas graves y urgentes, más 3 horas continuas entre las tareas de la mañana y las de la tarde. Además: habitación amueblada, higiénica y de uso exclusivo, y alimentación sana y suficiente — desayuno, almuerzo, merienda y cena."
+      "explain": "El entorno de trabajo: el empleador provee la ropa y los elementos, y responde por la salud, seguridad e higiene (C189, art. 13). El descanso: 9 horas consecutivas de reposo nocturno, interrumpible solo por causas graves y urgentes, más 3 horas continuas entre mañana y tarde. La habitación y la comida: habitación amueblada, higiénica y de destino exclusivo, y alimentación sana y suficiente — las cuatro comidas. Y desde el 1° de noviembre de 2015, la ART es obligatoria."
     },
     {
       "id": "c2",
