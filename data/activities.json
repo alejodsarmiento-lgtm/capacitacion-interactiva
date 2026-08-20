@@ -58,6 +58,82 @@
       "explain": "La vivienda no es un local comercial: rige el art. 18 de la Constitución Nacional. El acta que documenta la negativa es precisamente lo que habilita a pedir la orden judicial, con auxilio de la fuerza pública si el juez lo otorga."
     },
     {
+      "id": "b1",
+      "type": "quiz",
+      "bloque": "Cómo se inspecciona — Facultades del inspector",
+      "title": "¿Cuál de estas NO es una facultad del inspector de trabajo?",
+      "options": [
+        "Ingresar al lugar de trabajo de día o de noche",
+        "Exigir la exhibición de los libros y la documentación laboral",
+        "Forzar el ingreso a la vivienda sin consentimiento ni orden judicial",
+        "Tomar fotografías y filmar, notificándolo en el mismo acto"
+      ],
+      "correct": 2,
+      "explain": "El inspector está facultado a ingresar al lugar de trabajo de día o de noche, requerir información, exigir libros y documentación, entrevistar al personal antes, durante o después del trabajo, y fotografiar o filmar notificándolo en el acto, identificándose siempre con su credencial. Pero cuando el lugar de trabajo es una vivienda, el ingreso requiere consentimiento del titular o una orden judicial."
+    },
+    {
+      "id": "b2",
+      "type": "classify",
+      "bloque": "Cómo se inspecciona — Qué se puede constatar",
+      "title": "¿Esto se puede constatar sin entrar a la casa, o solo entrando?",
+      "categories": ["Sin entrar", "Solo entrando"],
+      "cards": [
+        { "id": "k1", "text": "La entrevista con la trabajadora fuera del domicilio", "correct": 0 },
+        { "id": "k2", "text": "Los registros de ingreso y egreso del barrio cerrado", "correct": 0 },
+        { "id": "k3", "text": "Las credenciales, tarjetas y planillas de acceso", "correct": 0 },
+        { "id": "k4", "text": "Los recibos de sueldo y la constancia de registración", "correct": 0 },
+        { "id": "k5", "text": "Lo que el empleador manifiesta en la puerta, volcado al acta", "correct": 0 },
+        { "id": "k6", "text": "Las condiciones de la habitación de la trabajadora sin retiro", "correct": 1 },
+        { "id": "k7", "text": "Las condiciones de seguridad e higiene del lugar donde se realiza la tarea", "correct": 1 }
+      ],
+      "explain": "Buena parte de la inspección puede hacerse sin franquear la puerta: entrevista, registros de acceso, credenciales, recibos y la manifestación del empleador en la puerta. Los operativos en countries invirtieron el punto de entrada usando el registro de accesos del barrio. Y toda visita se documenta en acta, aun la infructuosa: esa constancia es la que habilita a pedir la orden judicial."
+    },
+    {
+      "id": "a8",
+      "type": "poll",
+      "bloque": "Legislación comparada — El acceso al domicilio",
+      "title": "En tu país, ¿un inspector puede ingresar a una vivienda particular sin orden judicial?",
+      "options": ["Sí, siempre", "Solo con consentimiento del titular", "Nunca", "No estoy seguro/a"],
+      "byCountry": true
+    },
+    {
+      "id": "a7",
+      "type": "quiz",
+      "bloque": "Qué se controla",
+      "title": "¿Cuál es el tope de la jornada semanal en casas particulares?",
+      "options": ["40 horas", "44 horas", "45 horas", "48 horas"],
+      "correct": 3,
+      "explain": "La jornada no puede superar las 8 horas diarias ni las 48 semanales. El descanso semanal es de 35 horas corridas desde el sábado a las 13."
+    },
+    {
+      "id": "c1",
+      "type": "quiz",
+      "bloque": "El entorno de trabajo y el de descanso",
+      "title": "Para la trabajadora sin retiro, el descanso que la ley garantiza es…",
+      "options": [
+        "8 horas de reposo nocturno y 1 hora entre las tareas de la mañana y la tarde",
+        "9 horas consecutivas de reposo nocturno y 3 horas continuas entre la mañana y la tarde",
+        "10 horas de reposo nocturno, sin pausa entre turnos",
+        "No está reglado: se pacta con el empleador"
+      ],
+      "correct": 1,
+      "explain": "Reposo nocturno de 9 horas consecutivas, interrumpible solo por causas graves y urgentes, más 3 horas continuas entre las tareas de la mañana y las de la tarde. Además: habitación amueblada, higiénica y de uso exclusivo, y alimentación sana y suficiente — desayuno, almuerzo, merienda y cena."
+    },
+    {
+      "id": "c2",
+      "type": "quiz",
+      "bloque": "El entorno de trabajo y el de descanso",
+      "title": "«Todo trabajador doméstico tiene derecho a un entorno de trabajo seguro y saludable» (C189, art. 13). Incumplir las obligaciones de salud, seguridad e higiene es una infracción…",
+      "options": [
+        "Leve, porque ocurre dentro de una vivienda",
+        "Grave, y muy grave si deriva en un riesgo grave e inminente para la trabajadora",
+        "Muy grave en todos los casos",
+        "No está tipificada como infracción"
+      ],
+      "correct": 1,
+      "explain": "El empleador debe proveer la ropa y los elementos de trabajo y responde por las condiciones de salud, seguridad e higiene. Desde el 1° de noviembre de 2015 está además obligado a contratar una ART. El incumplimiento es infracción grave, y muy grave cuando genera un riesgo grave e inminente."
+    },
+    {
       "id": "a6",
       "type": "classify",
       "bloque": "Régimen sancionatorio",
@@ -75,23 +151,6 @@
         { "id": "c9", "text": "Actos contrarios a la intimidad y dignidad de la trabajadora", "correct": 2 }
       ],
       "explain": "Leves: hasta 150% del SMVM. Graves: hasta 200% por cada trabajadora afectada. Muy graves: hasta 2.000% por cada trabajadora afectada."
-    },
-    {
-      "id": "a7",
-      "type": "quiz",
-      "bloque": "Qué se controla",
-      "title": "¿Cuál es el tope de la jornada semanal en casas particulares?",
-      "options": ["40 horas", "44 horas", "45 horas", "48 horas"],
-      "correct": 3,
-      "explain": "La jornada no puede superar las 8 horas diarias ni las 48 semanales. El descanso semanal es de 35 horas corridas desde el sábado a las 13."
-    },
-    {
-      "id": "a8",
-      "type": "poll",
-      "bloque": "Legislación comparada — Convenio 189 OIT",
-      "title": "En tu país, ¿un inspector puede ingresar a una vivienda particular sin orden judicial?",
-      "options": ["Sí, siempre", "Solo con consentimiento del titular", "Nunca", "No estoy seguro/a"],
-      "byCountry": true
     },
     {
       "id": "a9",
