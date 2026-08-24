@@ -123,11 +123,14 @@ function renderLive(agg, rev){
   }
   else if(agg.type==='pollCountry'){
     const opts = act.options || [];
-    const m=Math.max(1,...agg.AR,...agg.GT);
-    html += `<div class="split">
-      <div><h2>🇦🇷 Argentina</h2>${agg.AR.map((n,i)=>bar(opts[i],n,m)).join('')}</div>
-      <div><h2>🇬🇹 Guatemala</h2>${agg.GT.map((n,i)=>bar(opts[i],n,m)).join('')}</div>
-    </div>`;
+    const m=Math.max(1,...(agg.counts||[1]));
+    html += `<div class="bars">` + (agg.counts||[]).map((n,i)=>`
+      <div class="brow">
+        <div class="lab"><span>${esc(opts[i]??('Opción '+(i+1)))}</span>
+        <span class="r">${agg.total?Math.round(n/agg.total*100):0}%</span></div>
+        <div class="bar"><div style="width:${Math.max(4,Math.round(n/m*100))}%">${n}</div></div>
+      </div>`).join('') + `</div>
+      <p style="color:#5a6b7d;font-size:18px;margin-top:14px">La respuesta de toda la sala — Argentina y Guatemala</p>`;
   }
   else if(agg.type==='classify'){
     html += `<table class="heat"><tr><th style="text-align:left">Infracción</th>${agg.categories.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>`;

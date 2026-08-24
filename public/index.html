@@ -25,7 +25,7 @@
   .prog div{height:100%; width:0; background:var(--cele2); border-radius:3px; transition:width .5s}
   .prog.hide{opacity:0}
 
-  main{position:relative; z-index:1; flex:1; padding:16px 14px 190px; max-width:560px; width:100%; margin:0 auto}
+  main{position:relative; z-index:1; flex:1; padding:16px 14px 96px; max-width:560px; width:100%; margin:0 auto}
   .card{background:#fff; border-radius:22px; padding:20px 18px; margin-bottom:14px; box-shadow:0 12px 30px rgba(8,20,40,.35)}
   .bloque{display:inline-block; background:var(--ice); color:#2B6C8C; font-size:10.5px; font-weight:bold;
           letter-spacing:.08em; text-transform:uppercase; border-radius:12px; padding:5px 12px}
@@ -69,13 +69,13 @@
   .ccard.rev-bad{border-color:var(--bad); background:#fdf4f1}
   .rev-tag{font-size:12.5px; font-weight:bold; margin-top:7px}
 
-  .bottom{position:fixed; bottom:0; left:0; right:0; background:#fff; border-radius:22px 22px 0 0;
-          box-shadow:0 -10px 28px rgba(8,20,40,.35); z-index:20; max-width:560px; margin:0 auto}
-  .tabs{display:flex; padding-top:6px}
-  .tabs button{flex:1; padding:10px 4px 8px; border:none; background:transparent; font-size:12.5px; color:var(--mut); border-bottom:3px solid transparent; font-weight:bold}
-  .tabs button.on{color:var(--navy); border-bottom-color:var(--cele)}
-  .semlbl{font-size:12px; color:var(--mut); text-align:center; margin:10px 0 9px}
-  .sems{display:flex; gap:8px; justify-content:center; padding:0 16px 16px}
+  .bottom{position:fixed; bottom:0; left:0; right:0; background:rgba(255,255,255,.98); border-radius:18px 18px 0 0;
+          box-shadow:0 -8px 24px rgba(8,20,40,.3); z-index:20; max-width:560px; margin:0 auto}
+  .tabs{display:flex; padding:4px 8px}
+  .tabs button{flex:1; padding:9px 4px; border:none; background:transparent; font-size:12px; color:var(--mut); font-weight:bold; border-radius:12px}
+  .tabs button.on{color:var(--navy); background:var(--ice)}
+  .semlbl{font-size:12px; color:var(--mut); text-align:center; margin:6px 0 9px}
+  .sems{display:flex; gap:8px; justify-content:center; padding:0 16px 14px}
   .pill{border:none; border-radius:20px; padding:12px 4px; font-size:12.5px; font-weight:bold; flex:1; max-width:118px; transition:.15s; color:#fff}
   .pill:active{transform:scale(.96)}
   .pill.v{background:#e7f5ec; color:#2e7d4f}
@@ -117,10 +117,10 @@
 
 <div class="bottom" id="bottom" style="display:none">
   <div class="tabs">
-    <button id="tabSem" class="on" onclick="showTab('sem')">🚦 Tu semáforo</button>
-    <button id="tabQ" onclick="showTab('q')">💬 Preguntas <span id="qCount"></span></button>
+    <button id="tabSem" onclick="toggleTab('sem')">🚦 Ritmo</button>
+    <button id="tabQ" onclick="toggleTab('q')">💬 Preguntas <span id="qCount"></span></button>
   </div>
-  <div id="panelSem">
+  <div id="panelSem" style="display:none">
     <div class="semlbl">Tu semáforo le marca el ritmo a la clase</div>
     <div class="sems">
       <button class="pill v" id="semV" onclick="setSem('verde')">Seguimos</button>
@@ -309,11 +309,15 @@ function renderRevealed(act, agg){
     if(agg.explain) inner += `<div class="explain">${esc(agg.explain)}</div>`;
   }
   else if(agg.type==='pollCountry'){
-    inner += `<div class="hint">Así respondió cada país</div>`;
+    inner += `<div class="hint">Así respondió la sala</div>`;
+    const max = Math.max(1,...agg.counts);
     inner += act.options.map((o,i)=>{
-      const a=agg.AR[i]||0, g=agg.GT[i]||0;
-      return `<div style="margin-bottom:13px"><b style="font-size:14px;color:var(--navy2)">${esc(o)}</b>
-        <div style="font-size:13px;margin-top:3px;color:var(--mut)">🇦🇷 ${a} &nbsp;·&nbsp; 🇬🇹 ${g}</div></div>`;
+      const n = agg.counts[i]||0;
+      const pct = agg.total? Math.round(n/agg.total*100):0;
+      return `<button class="opt ${myAnswer===i?'sel':''}" disabled>
+        ${esc(o)}<br><small>${n} respuestas · ${pct}%</small>
+        <div style="height:6px;background:#9db3c9;width:${Math.round(n/max*100)}%;border-radius:3px;margin-top:6px"></div>
+      </button>`;
     }).join('');
   }
   else if(agg.type==='classify'){
@@ -346,21 +350,26 @@ socket.on('idle', d=>{ renderIdle(); });
 socket.on('questions', renderQuestions);
 
 // ---------- Semáforo ----------
-let semCur=null;
+let semCur=null, semT=null;
 function setSem(c){
   semCur=c;
   socket.emit('semaforo', c);
   document.getElementById('semV').classList.toggle('on', c==='verde');
   document.getElementById('semA').classList.toggle('on', c==='amarillo');
   document.getElementById('semR').classList.toggle('on', c==='rojo');
+  toast('Registrado ✓');
+  clearTimeout(semT);
+  semT=setTimeout(()=>{ if(openTab==='sem') toggleTab('sem'); }, 900);
 }
 
 // ---------- Preguntas ----------
-function showTab(t){
-  document.getElementById('tabSem').classList.toggle('on', t==='sem');
-  document.getElementById('tabQ').classList.toggle('on', t==='q');
-  document.getElementById('panelSem').style.display = t==='sem'?'block':'none';
-  document.getElementById('panelQ').style.display = t==='q'?'block':'none';
+let openTab=null;
+function toggleTab(t){
+  openTab = (openTab===t)? null : t;
+  document.getElementById('tabSem').classList.toggle('on', openTab==='sem');
+  document.getElementById('tabQ').classList.toggle('on', openTab==='q');
+  document.getElementById('panelSem').style.display = openTab==='sem'?'block':'none';
+  document.getElementById('panelQ').style.display = openTab==='q'?'block':'none';
 }
 function sendQuestion(){
   const inp=document.getElementById('qText');
@@ -379,7 +388,7 @@ function renderQuestions(list){
     <div class="qrow ${q.answered?'ans':''}">
       <button class="vt" onclick="socket.emit('voteQuestion',${q.id})">▲ ${q.votes}</button>
       <div><div class="tx">${esc(q.text)}</div>
-      <div class="meta">${q.pais==='AR'?'🇦🇷':'🇬🇹'} ${esc(q.autor)} ${q.answered?'· respondida':''}</div></div>
+      <div class="meta">${esc(q.autor)} ${q.answered?'· respondida':''}</div></div>
     </div>`).join('') : '<div class="status" style="padding:14px">Todavía no hay preguntas. ¡Hacé la primera!</div>';
 }
 
