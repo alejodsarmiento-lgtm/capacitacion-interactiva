@@ -38,6 +38,63 @@ const state = {
 };
 let questionSeq = 1;
 
+// ---------- Persistencia en disco ----------
+// Guarda respuestas, preguntas y puntajes cada pocos segundos (asíncrono y atómico).
+// Si el proceso o el VPS se reinician, la sesión se restaura sola al arrancar.
+const PERSIST_FILE = path.join(__dirname, 'data', 'sesion.json');
+let persistDirty = false;
+
+function restoreState() {
+  try {
+    if (!fs.existsSync(PERSIST_FILE)) return;
+    const d = JSON.parse(fs.readFileSync(PERSIST_FILE, 'utf8'));
+    state.currentActivityId = d.currentActivityId ?? null;
+    state.revealed = !!d.revealed;
+    state.scores = d.scores || { AR: 0, GT: 0 };
+    state.scoreEvents = d.scoreEvents || [];
+    state.log = d.log || [];
+    questionSeq = d.questionSeq || 1;
+    state.questions = (d.questions || []).map(q => ({ ...q, votes: new Set(q.votes || []), autorId: null }));
+    state.responses = new Map(Object.entries(d.responses || {}).map(
+      ([actId, obj]) => [actId, new Map(Object.entries(obj))]
+    ));
+    console.log(`Sesión restaurada: ${state.log.length} respuestas, ${state.questions.length} preguntas`);
+  } catch (e) {
+    console.error('No se pudo restaurar la sesión previa:', e.message);
+  }
+}
+restoreState();
+
+async function persistState() {
+  const snap = JSON.stringify({
+    savedAt: new Date().toISOString(),
+    currentActivityId: state.currentActivityId,
+    revealed: state.revealed,
+    scores: state.scores,
+    scoreEvents: state.scoreEvents,
+    log: state.log,
+    questionSeq,
+    questions: state.questions.map(q => ({
+      id: q.id, text: q.text, autor: q.autor, pais: q.pais,
+      votes: [...q.votes], answered: q.answered, ts: q.ts
+    })),
+    responses: Object.fromEntries([...state.responses].map(
+      ([actId, m]) => [actId, Object.fromEntries(m)]
+    ))
+  });
+  try {
+    await fs.promises.writeFile(PERSIST_FILE + '.tmp', snap);
+    await fs.promises.rename(PERSIST_FILE + '.tmp', PERSIST_FILE); // escritura atómica
+  } catch (e) {
+    console.error('Error al persistir sesión:', e.message);
+  }
+}
+setInterval(() => {
+  if (!persistDirty) return;
+  persistDirty = false;
+  persistState();
+}, 5000);
+
 // ---------- Helpers ----------
 function participantKey(socket) {
   const p = state.participants.get(socket.id);
@@ -207,6 +264,7 @@ io.on('connection', socket => {
       nombre: p.nombre, pais: p.pais, rol: p.rol, valor: JSON.stringify(data.value)
     });
     dirty = true;
+    persistDirty = true;
     cb && cb({ ok: true });
   });
 
@@ -229,6 +287,7 @@ io.on('connection', socket => {
       pais: p.pais, votes: new Set(), answered: false, ts: Date.now()
     });
     qDirty = true;
+    persistDirty = true;
     cb && cb({ ok: true });
   });
 
@@ -238,6 +297,7 @@ io.on('connection', socket => {
     if (!q) return;
     if (q.votes.has(socket.id)) q.votes.delete(socket.id); else q.votes.add(socket.id);
     qDirty = true;
+    persistDirty = true;
   });
 
   // --- Staff (admin + pantalla) ---
@@ -268,6 +328,7 @@ io.on('connection', socket => {
     io.to('sala').emit('activity', { activity: sanitizeActivity(act), revealed: false, meta: actMeta(actId) });
     io.to('staff').emit('activity', { activity: sanitizeActivity(act), revealed: false, meta: actMeta(actId) });
     dirty = true;
+    persistDirty = true;
     cb && cb({ ok: true });
   });
 
@@ -277,6 +338,7 @@ io.on('connection', socket => {
     const act = getActivity(state.currentActivityId);
     const agg = aggregate(state.currentActivityId);
     io.emit('revealed', { activityId: act.id, agg, activity: fullActivity(act), scores: state.scores });
+    persistDirty = true;
     cb && cb({ ok: true });
   });
 
@@ -291,7 +353,7 @@ io.on('connection', socket => {
   socket.on('admin:answerQuestion', qid => {
     if (!socket.data.isAdmin) return;
     const q = state.questions.find(x => x.id === qid);
-    if (q) { q.answered = true; qDirty = true; }
+    if (q) { q.answered = true; qDirty = true; persistDirty = true; }
   });
 
   socket.on('disconnect', () => {
@@ -316,6 +378,22 @@ function fullActivity(act) {
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/salud', (req, res) => res.json({ ok: true, ...publicStats() }));
+
+app.get('/reset', async (req, res) => {
+  if (req.query.token !== ADMIN_TOKEN) return res.status(403).send('Token inválido');
+  state.currentActivityId = null;
+  state.revealed = false;
+  state.responses = new Map();
+  state.scores = { AR: 0, GT: 0 };
+  state.scoreEvents = [];
+  state.questions = [];
+  state.log = [];
+  questionSeq = 1;
+  try { await fs.promises.unlink(PERSIST_FILE); } catch (e) {}
+  io.emit('idle', {});
+  io.emit('questions', []);
+  res.json({ ok: true, mensaje: 'Sesión reiniciada: respuestas, preguntas y puntajes en cero.' });
+});
 
 app.get('/export.csv', (req, res) => {
   if (req.query.token !== ADMIN_TOKEN) return res.status(403).send('Token inválido');
