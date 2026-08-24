@@ -5,38 +5,39 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pantalla · Capacitación MTPBA</title>
 <style>
-  :root{ --dark:#2E4D6B; --band:#3B6491; --light:#DCE6F1; --gray:#F2F2F2; --border:#B7C2CD;
+  :root{ --dark:#1E3A68; --band:#2B4E85; --cele:#56A8C2; --cele2:#7FD1EA; --light:#EAF4F9; --gray:#EEF2F7; --border:#DDE7EF;
          --ok:#2e7d4f; --bad:#b3402a; }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:#1c2b3a;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-  header{background:var(--band);color:#fff;padding:14px 30px;display:flex;justify-content:space-between;align-items:center}
-  header .t1{font-size:14px;letter-spacing:.06em;text-transform:uppercase;opacity:.9}
+  body{font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;background:#fff;color:#22384f;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  header{background:var(--dark);color:#fff;padding:14px 30px;display:flex;justify-content:space-between;align-items:center;position:relative;overflow:hidden}
+  header:after{content:'';position:absolute;top:-90px;right:-60px;width:230px;height:230px;border-radius:50%;background:var(--band);z-index:0}
+  header>*{position:relative;z-index:1}
+  header .t1{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#9EC9DD;font-weight:bold}
   header .t2{font-size:22px;font-weight:bold}
   header .right{text-align:right;font-size:16px}
   main{flex:1;padding:28px 40px;overflow:hidden;display:flex;flex-direction:column}
-  .bloque{font-size:16px;text-transform:uppercase;letter-spacing:.06em;color:var(--band);font-weight:bold}
-  h1{font-size:34px;color:var(--dark);margin:6px 0 22px;line-height:1.25}
+  .bloque{display:inline-block;font-size:15px;text-transform:uppercase;letter-spacing:.08em;color:#2B6C8C;font-weight:bold;background:var(--light);border-radius:14px;padding:7px 18px}
+  h1{font-size:34px;color:var(--dark);margin:14px 0 22px;line-height:1.25}
   .waiting{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:18px}
   .waiting .big{font-size:40px;color:var(--dark);font-weight:bold}
-  .waiting .url{font-size:30px;background:var(--light);border:2px solid var(--border);border-radius:14px;padding:14px 34px;color:var(--dark);font-weight:bold}
+  .waiting .url{font-size:30px;background:var(--dark);border:none;border-radius:20px;padding:16px 40px;color:#fff;font-weight:bold;box-shadow:0 10px 26px rgba(20,40,70,.3)}
   .counter{font-size:22px;color:#5a6b7d}
   .bars{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px;max-width:1100px}
   .brow .lab{display:flex;justify-content:space-between;font-size:21px;margin-bottom:6px}
   .brow .lab .r{color:#5a6b7d}
-  .bar{height:34px;background:var(--gray);border-radius:17px;overflow:hidden}
-  .bar>div{height:100%;background:var(--band);border-radius:17px;transition:width .45s;display:flex;align-items:center;justify-content:flex-end;padding-right:14px;color:#fff;font-weight:bold;font-size:17px;min-width:44px}
+  .bar{height:36px;background:var(--gray);border-radius:18px;overflow:hidden}
+  .bar>div{height:100%;background:var(--cele);border-radius:18px;transition:width .45s;display:flex;align-items:center;justify-content:flex-end;padding-right:14px;color:#fff;font-weight:bold;font-size:17px;min-width:44px}
   .bar>div.c{background:var(--ok)}
   .split{display:grid;grid-template-columns:1fr 1fr;gap:34px;flex:1;align-content:center;max-width:1200px}
   .split h2{font-size:26px;margin-bottom:14px}
   .heat{width:100%;border-collapse:collapse;font-size:17px;max-width:1150px}
   .heat td,.heat th{border:1px solid var(--border);padding:9px 10px;text-align:center}
-  .heat th{background:var(--light);color:var(--dark)}
+  .heat th{background:var(--dark);color:#fff}
   .heat td.lbl{text-align:left;font-size:16px}
   .cloud{flex:1;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:6px;max-width:1150px;margin:0 auto}
   .cloud span{padding:4px 10px}
-  footer{background:var(--dark);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:12px 30px;font-size:19px}
-  .duel{display:flex;gap:26px;font-size:24px;font-weight:bold}
-  .explain{background:var(--light);border-left:6px solid var(--band);padding:14px 18px;font-size:19px;border-radius:0 10px 10px 0;margin-top:18px;max-width:1100px;line-height:1.4}
+  footer{background:var(--dark);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:12px 30px;font-size:19px;border-radius:22px 22px 0 0;box-shadow:0 -6px 20px rgba(20,40,70,.25)}
+  .explain{background:var(--light);border-left:6px solid var(--cele);padding:14px 18px;font-size:19px;border-radius:0 10px 10px 0;margin-top:18px;max-width:1100px;line-height:1.4}
   .qflash{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;border-radius:14px;padding:14px 26px;font-size:20px;max-width:80%;box-shadow:0 6px 24px rgba(0,0,0,.25);opacity:0;transition:.4s}
   .qflash.show{opacity:1}
 </style>
@@ -51,8 +52,8 @@
 </header>
 <main id="main"></main>
 <footer>
-  <div id="fConn">0 conectados · 🇦🇷 0 · 🇬🇹 0</div>
-  <div class="duel">Duelo &nbsp; 🇦🇷 <span id="fAR">0</span> — <span id="fGT">0</span> 🇬🇹</div>
+  <div id="fConn">0 participantes en la sala</div>
+  <div style="font-size:17px;opacity:.85">Argentina y Guatemala · una sala compartida</div>
 </footer>
 <div class="qflash" id="qflash"></div>
 
@@ -92,9 +93,7 @@ socket.on('idle', ()=>{ current=null; revealed=false; renderWaiting(lastTotal); 
 let lastTotal=0;
 socket.on('stats', s=>{
   lastTotal=s.total;
-  document.getElementById('fConn').textContent = `${s.total} conectados · 🇦🇷 ${s.ar} · 🇬🇹 ${s.gt}`;
-  document.getElementById('fAR').textContent=s.scores.AR;
-  document.getElementById('fGT').textContent=s.scores.GT;
+  document.getElementById('fConn').textContent = `${s.total} participantes en la sala`;
   const w=document.getElementById('wN'); if(w) w.textContent=s.total;
 });
 

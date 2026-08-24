@@ -5,50 +5,50 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel del disertante · MTPBA</title>
 <style>
-  :root{ --dark:#2E4D6B; --band:#3B6491; --light:#DCE6F1; --gray:#F2F2F2; --border:#B7C2CD;
+  :root{ --dark:#1E3A68; --band:#2B4E85; --cele:#56A8C2; --light:#EAF4F9; --gray:#EEF2F7; --border:#DDE7EF;
          --ok:#2e7d4f; --warn:#b98a00; --bad:#b3402a; }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:Arial,Helvetica,sans-serif;background:var(--gray);color:#1c2b3a}
+  body{font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;background:var(--gray);color:#22384f}
   header{background:var(--dark);color:#fff;padding:10px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
   header b{font-size:15px}
   .pill{background:var(--band);border-radius:20px;padding:5px 14px;font-size:13px;margin-left:8px}
   .wrap{display:grid;grid-template-columns:340px 1fr 300px;gap:14px;padding:14px;max-width:1500px;margin:0 auto}
   @media(max-width:1100px){.wrap{grid-template-columns:1fr}}
   .col{display:flex;flex-direction:column;gap:12px}
-  .card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px}
-  h3{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--band);margin-bottom:10px}
-  .act{border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:.12s;background:#fff}
+  .card{background:#fff;border:none;border-radius:18px;padding:16px;box-shadow:0 4px 14px rgba(20,40,70,.08)}
+  h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#2B6C8C;margin-bottom:10px}
+  .act{border:2px solid var(--border);border-radius:14px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:.12s;background:#fff}
   .act:hover{background:var(--light)}
-  .act.on{border-color:var(--band);background:#c9d9ec}
+  .act.on{border-color:var(--dark);background:var(--dark)} .act.on .bl{color:#9EC9DD} .act.on .ti{color:#fff} .act.on .ty{color:#bcd3ea}
   .act .bl{font-size:10.5px;text-transform:uppercase;color:var(--band);font-weight:bold}
   .act .ti{font-size:13.5px;line-height:1.3;margin-top:2px}
   .act .ty{font-size:11px;color:#5a6b7d;margin-top:3px}
-  button.big{width:100%;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:bold;cursor:pointer;font-family:inherit;margin-bottom:8px}
+  button.big{width:100%;border:none;border-radius:14px;padding:13px;font-size:15px;font-weight:bold;cursor:pointer;font-family:inherit;margin-bottom:8px}
   .b1{background:var(--dark);color:#fff}
-  .b2{background:var(--ok);color:#fff}
+  .b2{background:var(--cele);color:#fff}
   .b3{background:#8a9bac;color:#fff}
   button.big:disabled{opacity:.4;cursor:default}
   .stat-row{display:flex;gap:10px;text-align:center}
-  .stat{flex:1;background:var(--light);border-radius:8px;padding:10px 4px}
+  .stat{flex:1;background:var(--light);border-radius:14px;padding:10px 4px}
   .stat .n{font-size:24px;font-weight:bold;color:var(--dark)}
   .stat .l{font-size:11px;color:#5a6b7d}
   .bar-row{margin-bottom:10px}
   .bar-row .lab{font-size:13px;margin-bottom:3px;display:flex;justify-content:space-between}
-  .bar{height:16px;background:var(--light);border-radius:8px;overflow:hidden}
-  .bar>div{height:100%;background:var(--band);border-radius:8px;transition:width .3s}
+  .bar{height:16px;background:var(--gray);border-radius:8px;overflow:hidden}
+  .bar>div{height:100%;background:var(--cele);border-radius:8px;transition:width .3s}
   .bar>div.c{background:var(--ok)}
   .sem-dots{display:flex;gap:8px;align-items:center;font-size:14px}
   .dot{width:14px;height:14px;border-radius:50%;display:inline-block;margin-right:4px}
   .qrow{border-bottom:1px solid var(--gray);padding:8px 0;font-size:13px}
   .qrow .meta{font-size:11px;color:#5a6b7d;margin:2px 0 4px}
   .qrow button{font-size:11.5px;border:1px solid var(--border);background:var(--light);border-radius:6px;padding:3px 8px;cursor:pointer;margin-right:6px}
-  .login{max-width:380px;margin:80px auto;background:#fff;border:1px solid var(--border);border-radius:10px;padding:24px}
-  .login input{width:100%;border:2px solid var(--border);border-radius:8px;padding:12px;font-size:15px;margin:10px 0}
+  .login{max-width:380px;margin:80px auto;background:#fff;border:none;border-radius:18px;padding:26px;box-shadow:0 10px 30px rgba(20,40,70,.15)}
+  .login input{width:100%;border:2px solid var(--border);border-radius:12px;padding:12px;font-size:15px;margin:10px 0}
   .duelbox{display:flex;justify-content:space-around;font-size:20px;font-weight:bold;color:var(--dark)}
   .heat{width:100%;border-collapse:collapse;font-size:12px}
   .heat td,.heat th{border:1px solid var(--border);padding:5px 6px;text-align:center}
   .heat td.lbl{text-align:left;font-size:11.5px}
-  a.exp{display:block;text-align:center;background:var(--light);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--dark);font-weight:bold;text-decoration:none;font-size:14px}
+  a.exp{display:block;text-align:center;background:var(--light);border:none;border-radius:14px;padding:12px;color:var(--dark);font-weight:bold;text-decoration:none;font-size:14px}
 </style>
 </head>
 <body>
@@ -195,11 +195,11 @@ function renderSem(s){
   const c=s.colors, tot=(c.verde+c.amarillo+c.rojo)||0;
   if(!tot){ el.innerHTML='<span style="color:#5a6b7d">Sin señales todavía.</span>'; return; }
   el.innerHTML = `
-   <div class="sem-dots"><span class="dot" style="background:#4caf7d"></span>${c.verde}
-   <span class="dot" style="background:#f2c94c;margin-left:10px"></span>${c.amarillo}
-   <span class="dot" style="background:#e57358;margin-left:10px"></span>${c.rojo}</div>
-   ${c.rojo>tot*0.3?'<p style="color:var(--bad);font-size:12.5px;margin-top:8px"><b>⚠ Más del 30% en rojo:</b> conviene frenar y recapitular.</p>':''}
-   ${s.byRol&&Object.keys(s.byRol).length?'<p style="font-size:11.5px;color:#5a6b7d;margin-top:8px">'+Object.entries(s.byRol).map(([r,v])=>`${r}: 🟢${v.verde} 🟡${v.amarillo} 🔴${v.rojo}`).join(' · ')+'</p>':''}`;
+   <div class="sem-dots"><span class="dot" style="background:#4caf7d"></span>Seguimos: <b>${c.verde}</b>
+   <span class="dot" style="background:#f2c94c;margin-left:10px"></span>Más despacio: <b>${c.amarillo}</b>
+   <span class="dot" style="background:#e57358;margin-left:10px"></span>Repasemos: <b>${c.rojo}</b></div>
+   ${c.rojo>tot*0.3?'<p style="color:var(--bad);font-size:12.5px;margin-top:8px"><b>⚠ Más del 30% pide repasar:</b> conviene frenar y recapitular.</p>':''}
+   ${s.byRol&&Object.keys(s.byRol).length?'<p style="font-size:11.5px;color:#5a6b7d;margin-top:8px">'+Object.entries(s.byRol).map(([r,v])=>`${r} — 🟢${v.verde} 🟡${v.amarillo} 🔴${v.rojo}`).join(' · ')+'</p>':''}`;
 }
 function renderQs(list){
   const el=document.getElementById('qBox'); if(!el) return;
