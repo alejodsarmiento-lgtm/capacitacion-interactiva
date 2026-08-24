@@ -24,6 +24,7 @@ const roles = ['inspector','inspector','inspector','funcionario','abogado','otro
 const palabras = ['derechos','trabajo','dignidad','registración','inspección','protección','ley','justicia','cuidado','igualdad'];
 
 const lat = { join: [], resp: [] };
+const motivos = {};
 let joined = 0, errores = 0, respuestasOk = 0, revealsRecibidos = 0, desconexiones = 0;
 
 function pct(a, p) { const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length * p)] || 0; }
@@ -96,6 +97,7 @@ async function main() {
         c.emit('respond', { activityId: act.id, value: respuestaPara(act, i) }, r => {
           rl.push(Date.now() - ts); done++;
           if (r && r.ok) respuestasOk++;
+          else { const e = r ? (r.error || 'error_sin_detalle') : 'ack_vacio'; motivos[e] = (motivos[e] || 0) + 1; }
         });
       }, delay);
     });
@@ -106,7 +108,7 @@ async function main() {
       if (i % 40 === a % 40) setTimeout(() => c.emit('question', { text: `Pregunta de ensayo ${a}-${i}: ¿cómo se documenta este supuesto en el acta?` }, () => {}), Math.random() * VENTANA);
       if (i % 15 === 0) setTimeout(() => c.emit('voteQuestion', 1 + ((i + a) % 8)), Math.random() * VENTANA);
     });
-    await waitFor(() => done >= clients.length * 0.99, VENTANA + 20000);
+    await waitFor(() => done >= clients.length, VENTANA + 25000);
     lat.resp.push(...rl);
     await new Promise(r => admin.emit('admin:reveal', r));
     console.log(`✓ ${String(a + 1).padStart(2)}/${ACTIVITIES.length} ${act.id.padEnd(3)} [${act.type.padEnd(9)}] ${rl.length} resp en ${((Date.now() - t) / 1000).toFixed(1)}s — p95: ${pct(rl, .95)}ms · ${esc(act.title)}`);
@@ -129,6 +131,7 @@ async function main() {
   console.log(`Reconexiones/caídas durante la sesión: ${desconexiones}`);
   console.log(`Export CSV: ${(csv.length / 1024).toFixed(1)} KB · ${filas} filas`);
   console.log(`Conectados al cierre según /salud: ${salud.total}`);
+  if (Object.keys(motivos).length) console.log(`Motivos de rechazo:`, JSON.stringify(motivos));
   const ok = errores === 0 && respuestasOk >= joined * ACTIVITIES.length * 0.97;
   console.log(`\n=== ${ok ? 'ENSAYO COMPLETO: TODO OK ✓' : 'REVISAR: hubo pérdidas por encima del 3%'} ===`);
   console.log(`No olvidar la limpieza:  curl "${URL}/reset?token=TU-TOKEN"\n`);
