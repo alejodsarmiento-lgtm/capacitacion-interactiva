@@ -48,6 +48,11 @@ function getActivity(id) {
   return ACTIVITIES.find(a => a.id === id) || null;
 }
 
+function actMeta(id) {
+  const idx = ACTIVITIES.findIndex(a => a.id === id);
+  return { idx: idx + 1, total: ACTIVITIES.length };
+}
+
 function publicStats() {
   let ar = 0, gt = 0;
   for (const p of state.participants.values()) {
@@ -154,6 +159,7 @@ io.on('connection', socket => {
     cb && cb({
       ok: true,
       current: act ? sanitizeActivity(act) : null,
+      meta: act ? actMeta(act.id) : null,
       revealed: state.revealed,
       agg: state.revealed && act ? aggregate(act.id) : null,
       questions: questionsPayload(),
@@ -258,8 +264,8 @@ io.on('connection', socket => {
     state.currentActivityId = actId;
     state.revealed = false;
     if (!state.responses.has(actId)) state.responses.set(actId, new Map());
-    io.to('sala').emit('activity', { activity: sanitizeActivity(act), revealed: false });
-    io.to('staff').emit('activity', { activity: sanitizeActivity(act), revealed: false });
+    io.to('sala').emit('activity', { activity: sanitizeActivity(act), revealed: false, meta: actMeta(actId) });
+    io.to('staff').emit('activity', { activity: sanitizeActivity(act), revealed: false, meta: actMeta(actId) });
     dirty = true;
     cb && cb({ ok: true });
   });
