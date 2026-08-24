@@ -26,7 +26,11 @@
       "type": "poll",
       "bloque": "Legislación comparada",
       "title": "En tu país, ¿es válida la denuncia laboral anónima?",
-      "options": ["Sí", "No", "No estoy seguro/a"],
+      "options": [
+        "Sí",
+        "No",
+        "No estoy seguro/a"
+      ],
       "byCountry": true
     },
     {
@@ -76,15 +80,46 @@
       "type": "classify",
       "bloque": "Cómo se inspecciona — Qué se puede constatar",
       "title": "¿Esto se puede constatar sin entrar a la casa, o solo entrando?",
-      "categories": ["Sin entrar", "Solo entrando"],
+      "categories": [
+        "Sin entrar",
+        "Solo entrando"
+      ],
       "cards": [
-        { "id": "k1", "text": "La entrevista con la trabajadora fuera del domicilio", "correct": 0 },
-        { "id": "k2", "text": "Los registros de ingreso y egreso del barrio cerrado", "correct": 0 },
-        { "id": "k3", "text": "Las credenciales, tarjetas y planillas de acceso", "correct": 0 },
-        { "id": "k4", "text": "Los recibos de sueldo y la constancia de registración", "correct": 0 },
-        { "id": "k5", "text": "Lo que el empleador manifiesta en la puerta, volcado al acta", "correct": 0 },
-        { "id": "k6", "text": "Las condiciones de la habitación de la trabajadora sin retiro", "correct": 1 },
-        { "id": "k7", "text": "Las condiciones de seguridad e higiene del lugar donde se realiza la tarea", "correct": 1 }
+        {
+          "id": "k1",
+          "text": "La entrevista con la trabajadora fuera del domicilio",
+          "correct": 0
+        },
+        {
+          "id": "k2",
+          "text": "Los registros de ingreso y egreso del barrio cerrado",
+          "correct": 0
+        },
+        {
+          "id": "k3",
+          "text": "Las credenciales, tarjetas y planillas de acceso",
+          "correct": 0
+        },
+        {
+          "id": "k4",
+          "text": "Los recibos de sueldo y la constancia de registración",
+          "correct": 0
+        },
+        {
+          "id": "k5",
+          "text": "Lo que el empleador manifiesta en la puerta, volcado al acta",
+          "correct": 0
+        },
+        {
+          "id": "k6",
+          "text": "Las condiciones de la habitación de la trabajadora sin retiro",
+          "correct": 1
+        },
+        {
+          "id": "k7",
+          "text": "Las condiciones de seguridad e higiene del lugar donde se realiza la tarea",
+          "correct": 1
+        }
       ],
       "explain": "Buena parte de la inspección puede hacerse sin franquear la puerta: entrevista, registros de acceso, credenciales, recibos y la manifestación del empleador en la puerta. Los operativos en countries invirtieron el punto de entrada usando el registro de accesos del barrio. Y toda visita se documenta en acta, aun la infructuosa: esa constancia es la que habilita a pedir la orden judicial."
     },
@@ -93,7 +128,12 @@
       "type": "poll",
       "bloque": "Legislación comparada — El acceso al domicilio",
       "title": "En tu país, ¿un inspector puede ingresar a una vivienda particular sin orden judicial?",
-      "options": ["Sí, siempre", "Solo con consentimiento del titular", "Nunca", "No estoy seguro/a"],
+      "options": [
+        "Sí, siempre",
+        "Solo con consentimiento del titular",
+        "Nunca",
+        "No estoy seguro/a"
+      ],
       "byCountry": true
     },
     {
@@ -101,7 +141,12 @@
       "type": "quiz",
       "bloque": "Qué se controla",
       "title": "¿Cuál es el tope de la jornada semanal en casas particulares?",
-      "options": ["40 horas", "44 horas", "45 horas", "48 horas"],
+      "options": [
+        "40 horas",
+        "44 horas",
+        "45 horas",
+        "48 horas"
+      ],
       "correct": 3,
       "explain": "La jornada no puede superar las 8 horas diarias ni las 48 semanales. El descanso semanal es de 35 horas corridas desde el sábado a las 13."
     },
@@ -110,16 +155,51 @@
       "type": "classify",
       "bloque": "El entorno de trabajo y el de descanso",
       "title": "«La casa es, al mismo tiempo, vivienda de una familia y lugar de trabajo de una persona.» ¿Verdadero o falso?",
-      "categories": ["Verdadero", "Falso"],
+      "categories": [
+        "Verdadero",
+        "Falso"
+      ],
       "cards": [
-        { "id": "v1", "text": "La ropa y los elementos de trabajo los debe proveer el empleador", "correct": 0 },
-        { "id": "v2", "text": "Las condiciones de salud, seguridad e higiene son responsabilidad de quien trabaja", "correct": 1 },
-        { "id": "v3", "text": "El reposo nocturno de quien duerme en el lugar es de 9 horas consecutivas", "correct": 0 },
-        { "id": "v4", "text": "Ese reposo puede interrumpirse por cualquier necesidad de la familia", "correct": 1 },
-        { "id": "v5", "text": "Entre las tareas de la mañana y las de la tarde corresponden 3 horas continuas de descanso", "correct": 0 },
-        { "id": "v6", "text": "La habitación puede compartirse con otros miembros del hogar si está amueblada e higiénica", "correct": 1 },
-        { "id": "v7", "text": "La alimentación comprende desayuno, almuerzo, merienda y cena", "correct": 0 },
-        { "id": "v8", "text": "Contratar una aseguradora de riesgos del trabajo es optativo para el empleador", "correct": 1 }
+        {
+          "id": "v1",
+          "text": "La ropa y los elementos de trabajo los debe proveer el empleador",
+          "correct": 0
+        },
+        {
+          "id": "v2",
+          "text": "Las condiciones de salud, seguridad e higiene son responsabilidad de quien trabaja",
+          "correct": 1
+        },
+        {
+          "id": "v3",
+          "text": "El reposo nocturno de quien duerme en el lugar es de 9 horas consecutivas",
+          "correct": 0
+        },
+        {
+          "id": "v4",
+          "text": "Ese reposo puede interrumpirse por cualquier necesidad de la familia",
+          "correct": 1
+        },
+        {
+          "id": "v5",
+          "text": "Entre las tareas de la mañana y las de la tarde corresponden 3 horas continuas de descanso",
+          "correct": 0
+        },
+        {
+          "id": "v6",
+          "text": "La habitación puede compartirse con otros miembros del hogar si está amueblada e higiénica",
+          "correct": 1
+        },
+        {
+          "id": "v7",
+          "text": "La alimentación comprende desayuno, almuerzo, merienda y cena",
+          "correct": 0
+        },
+        {
+          "id": "v8",
+          "text": "Contratar una aseguradora de riesgos del trabajo es optativo para el empleador",
+          "correct": 1
+        }
       ],
       "explain": "El entorno de trabajo: el empleador provee la ropa y los elementos, y responde por la salud, seguridad e higiene (C189, art. 13). El descanso: 9 horas consecutivas de reposo nocturno, interrumpible solo por causas graves y urgentes, más 3 horas continuas entre mañana y tarde. La habitación y la comida: habitación amueblada, higiénica y de destino exclusivo, y alimentación sana y suficiente — las cuatro comidas. Y desde el 1° de noviembre de 2015, la ART es obligatoria."
     },
@@ -142,17 +222,57 @@
       "type": "classify",
       "bloque": "Régimen sancionatorio",
       "title": "Ubicá cada infracción donde creés que corresponde",
-      "categories": ["Leve", "Grave", "Muy grave"],
+      "categories": [
+        "Leve",
+        "Grave",
+        "Muy grave"
+      ],
       "cards": [
-        { "id": "c1", "text": "Pago del sueldo con pocos días de atraso", "correct": 0 },
-        { "id": "c2", "text": "Incumplimiento meramente formal o documental", "correct": 0 },
-        { "id": "c3", "text": "Registrarla por menos horas de las que trabaja", "correct": 1 },
-        { "id": "c4", "text": "No entregar el recibo de sueldo firmado", "correct": 1 },
-        { "id": "c5", "text": "Superar la jornada máxima legal", "correct": 1 },
-        { "id": "c6", "text": "Pagar por debajo de la escala mínima", "correct": 1 },
-        { "id": "c7", "text": "Tener a la trabajadora sin registrar", "correct": 2 },
-        { "id": "c8", "text": "Ocupar a una persona menor de dieciséis años", "correct": 2 },
-        { "id": "c9", "text": "Actos contrarios a la intimidad y dignidad de la trabajadora", "correct": 2 }
+        {
+          "id": "c1",
+          "text": "Pago del sueldo con pocos días de atraso",
+          "correct": 0
+        },
+        {
+          "id": "c2",
+          "text": "Incumplimiento meramente formal o documental",
+          "correct": 0
+        },
+        {
+          "id": "c3",
+          "text": "Registrarla por menos horas de las que trabaja",
+          "correct": 1
+        },
+        {
+          "id": "c4",
+          "text": "No entregar el recibo de sueldo firmado",
+          "correct": 1
+        },
+        {
+          "id": "c5",
+          "text": "Superar la jornada máxima legal",
+          "correct": 1
+        },
+        {
+          "id": "c6",
+          "text": "Pagar por debajo de la escala mínima",
+          "correct": 1
+        },
+        {
+          "id": "c7",
+          "text": "Tener a la trabajadora sin registrar",
+          "correct": 2
+        },
+        {
+          "id": "c8",
+          "text": "Ocupar a una persona menor de dieciséis años",
+          "correct": 2
+        },
+        {
+          "id": "c9",
+          "text": "Actos contrarios a la intimidad y dignidad de la trabajadora",
+          "correct": 2
+        }
       ],
       "explain": "Leves: hasta 150% del SMVM. Graves: hasta 200% por cada trabajadora afectada. Muy graves: hasta 2.000% por cada trabajadora afectada."
     },
@@ -161,7 +281,12 @@
       "type": "quiz",
       "bloque": "Régimen sancionatorio",
       "title": "La multa por una infracción muy grave puede llegar, por cada trabajadora afectada, hasta el…",
-      "options": ["150% del SMVM", "200% del SMVM", "1.000% del SMVM", "2.000% del SMVM"],
+      "options": [
+        "150% del SMVM",
+        "200% del SMVM",
+        "1.000% del SMVM",
+        "2.000% del SMVM"
+      ],
       "correct": 3,
       "explain": "Y obstruir la inspección tiene su propia escala, que llega al 5.000% del salario mínimo, vital y móvil."
     },
@@ -169,7 +294,7 @@
       "id": "a10",
       "type": "wordcloud",
       "bloque": "Cierre",
-      "title": "Después de estas tres horas: ¿con qué palabra te quedás?",
+      "title": "Después de esta jornada: ¿con qué palabra te quedás?",
       "subtitle": "Una sola palabra"
     }
   ]
