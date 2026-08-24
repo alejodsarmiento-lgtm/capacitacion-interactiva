@@ -91,7 +91,8 @@ function aggregate(activityId) {
       const arr = paisOf(k) === 'GT' ? GT : AR;
       if (arr[ans.value] !== undefined) arr[ans.value]++;
     }
-    return { type: 'pollCountry', AR, GT, total: resp.size };
+    const counts = AR.map((n, i) => n + GT[i]); // resultado común de toda la sala
+    return { type: 'pollCountry', AR, GT, counts, total: resp.size };
   }
   if (act.type === 'classify') {
     // heat[cardId] = [countCat0, countCat1, countCat2]
