@@ -108,6 +108,7 @@ function renderApp(res){
           <div class="stat"><div class="n" id="sTot">0</div><div class="l">Conectados</div></div>
           <div class="stat"><div class="n" id="sAR">0</div><div class="l">🇦🇷</div></div>
           <div class="stat"><div class="n" id="sGT">0</div><div class="l">🇬🇹</div></div>
+          <div class="stat"><div class="n" id="sOT">0</div><div class="l">🌎 Otros</div></div>
         </div>
         <div style="margin-top:12px"><h3>Duelo por país</h3><div class="duelbox"><span>🇦🇷 <span id="dAR">0</span></span><span>🇬🇹 <span id="dGT">0</span></span></div></div>
       </div>
@@ -198,6 +199,7 @@ function renderStats(s){
   document.getElementById('sTot').textContent=s.total;
   document.getElementById('sAR').textContent=s.ar;
   document.getElementById('sGT').textContent=s.gt;
+  var ot=document.getElementById('sOT'); if(ot) ot.textContent=s.ot||0;
   document.getElementById('dAR').textContent=s.scores.AR;
   document.getElementById('dGT').textContent=s.scores.GT;
   document.getElementById('pillConn').textContent=s.total+' conectados';

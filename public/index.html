@@ -174,12 +174,15 @@ function renderJoin(){
     <div class="pais-row">
       <button id="pAR" onclick="pickPais('AR')">🇦🇷 Argentina</button>
       <button id="pGT" onclick="pickPais('GT')">🇬🇹 Guatemala</button>
+      <button id="pOT" onclick="pickPais('OT')">🌎 Otro</button>
     </div>
+    <input type="text" id="jPaisOtro" maxlength="40" placeholder="¿Desde qué país te conectás?" style="display:none;margin-top:10px">
     <label>Tu rol</label>
     <select id="jRol">
       <option value="inspector">Inspector / Inspectora</option>
       <option value="funcionario">Funcionario / Funcionaria</option>
       <option value="abogado">Abogado / Abogada</option>
+      <option value="trabajador">Trabajador/a de casa particular</option>
       <option value="otro">Otro</option>
     </select>
     <button class="send" style="margin-top:18px" onclick="join()">Ingresar</button>
@@ -190,13 +193,19 @@ function pickPais(p){
   paisSel = p;
   document.getElementById('pAR').classList.toggle('sel', p==='AR');
   document.getElementById('pGT').classList.toggle('sel', p==='GT');
+  document.getElementById('pOT').classList.toggle('sel', p==='OT');
+  const inp = document.getElementById('jPaisOtro');
+  inp.style.display = p==='OT' ? 'block' : 'none';
+  if(p==='OT') setTimeout(()=>inp.focus(), 50);
 }
 function join(){
   const nombre = document.getElementById('jNombre').value.trim();
   const rol = document.getElementById('jRol').value;
+  const paisOtro = document.getElementById('jPaisOtro').value.trim();
   if(!nombre) return toast('Escribí tu nombre');
   if(!paisSel) return toast('Elegí tu país');
-  socket.emit('join', {nombre, pais:paisSel, rol}, res=>{
+  if(paisSel==='OT' && !paisOtro) return toast('Escribí desde qué país te conectás');
+  socket.emit('join', {nombre, pais:paisSel, paisOtro, rol}, res=>{
     if(!res.ok) return toast(res.error||'Error');
     me = {nombre, pais:paisSel, rol};
     try{ sessionStorage.setItem('me', JSON.stringify(me)); }catch(e){}
