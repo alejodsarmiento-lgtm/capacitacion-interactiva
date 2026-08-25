@@ -56,7 +56,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io({transports:['websocket','polling']});
-let token=null, ACT=[], currentId=null, revealed=false;
+let token=null, ACT=[], currentId=null, revealed=false, liveOn=false;
 
 function renderLogin(){
   document.getElementById('app').innerHTML = `
@@ -75,7 +75,7 @@ function login(){
 function staffJoin(){
   socket.emit('staffJoin', {token, role:'admin'}, res=>{
     if(!res.ok){ const e=document.getElementById('err'); if(e)e.textContent='Token inválido'; return; }
-    ACT = res.activities; currentId = res.current?res.current.id:null; revealed = res.revealed;
+    ACT = res.activities; currentId = res.current?res.current.id:null; revealed = res.revealed; liveOn = !!res.liveWC;
     renderApp(res);
     if(res.agg) renderResults({activityId:currentId, agg:res.agg, revealed});
     renderStats(res.stats); renderSem(res.semaforo); renderQs(res.questions);
@@ -96,6 +96,7 @@ function renderApp(res){
     <div class="col">
       <div class="card">
         <h3>Control</h3>
+        <button class="big b2" id="btnLive" onclick="liveWC()" disabled style="display:none">▶ Iniciar nube en vivo</button>
         <button class="big b2" id="btnReveal" onclick="reveal()" disabled>Revelar resultados</button>
         <button class="big b3" onclick="idle()">Cerrar actividad (volver a espera)</button>
       </div>
@@ -128,15 +129,26 @@ function renderActList(){
     </div>`).join('');
   document.getElementById('pillCur').textContent = currentId ? ('En curso: '+currentId.toUpperCase()) : 'Sin actividad';
   const br=document.getElementById('btnReveal'); if(br) br.disabled = !currentId || revealed;
+  const cur = ACT.find(x=>x.id===currentId);
+  const bl=document.getElementById('btnLive');
+  if(bl){
+    const esWC = cur && cur.type==='wordcloud';
+    bl.style.display = esWC ? 'block' : 'none';
+    bl.disabled = !esWC || liveOn || revealed;
+    bl.textContent = liveOn ? '● Nube en vivo activa' : '▶ Iniciar nube en vivo';
+  }
 }
 
 function start(id){
   socket.emit('admin:start', id, res=>{
-    if(res.ok){ currentId=id; revealed=false; renderActList(); }
+    if(res.ok){ currentId=id; revealed=false; liveOn=false; renderActList(); }
   });
 }
+function liveWC(){
+  socket.emit('admin:liveWC', res=>{ if(res&&res.ok){ liveOn=true; renderActList(); } });
+}
 function reveal(){ socket.emit('admin:reveal', ()=>{ revealed=true; renderActList(); }); }
-function idle(){ socket.emit('admin:idle', ()=>{ currentId=null; revealed=false; renderActList();
+function idle(){ socket.emit('admin:idle', ()=>{ currentId=null; revealed=false; liveOn=false; renderActList();
   document.getElementById('results').innerHTML='<p style="font-size:14px;color:#5a6b7d">Sala en espera.</p>'; }); }
 
 socket.on('results', renderResults);

@@ -38,6 +38,16 @@
   .cloud span{padding:4px 10px}
   footer{background:var(--dark);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:12px 30px;font-size:19px;border-radius:22px 22px 0 0;box-shadow:0 -6px 20px rgba(20,40,70,.25)}
   .explain{background:var(--light);border-left:6px solid var(--cele);padding:14px 18px;font-size:19px;border-radius:0 10px 10px 0;margin-top:18px;max-width:1100px;line-height:1.4}
+  .cloudC{position:relative; background:var(--dark); border-radius:26px; height:100%; overflow:hidden}
+  .cloudC .deco1{position:absolute; top:-140px; right:-120px; width:380px; height:380px; border-radius:50%; background:var(--band)}
+  .cloudC .deco2{position:absolute; bottom:-160px; left:-140px; width:420px; height:420px; border-radius:50%; background:var(--cele); opacity:.2}
+  .cc-label{position:absolute; top:30px; width:100%; text-align:center; color:#9EC9DD; font-size:21px; letter-spacing:.3em; font-weight:bold; z-index:2}
+  .cc-hero{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:2; pointer-events:none}
+  .cc-hero span{color:#fff; font-weight:bold; text-align:center; line-height:1.02; transition:font-size .5s; padding:0 40px}
+  .cc-hero span.pop{animation:ccpop .55s}
+  @keyframes ccpop{0%{transform:scale(.7); opacity:.2} 100%{transform:scale(1); opacity:1}}
+  .cc-orbit span{position:absolute; color:#9EC9DD; font-weight:bold; white-space:nowrap; transition:all .7s; opacity:.85; z-index:1}
+  .cc-total{position:absolute; bottom:22px; width:100%; text-align:center; color:#9EC9DD; font-size:21px; z-index:2}
   .qflash{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;border-radius:14px;padding:14px 26px;font-size:20px;max-width:80%;box-shadow:0 6px 24px rgba(0,0,0,.25);opacity:0;transition:.4s}
   .qflash.show{opacity:1}
 </style>
@@ -62,13 +72,13 @@
 const socket = io({transports:['websocket','polling']});
 const params = new URLSearchParams(location.search);
 const token = params.get('token') || '';
-let ACT=[], current=null, revealed=false;
+let ACT=[], current=null, revealed=false, liveWC=false;
 document.getElementById('hdrUrl').textContent = location.host;
 
 function staffJoin(){
   socket.emit('staffJoin',{token, role:'pantalla'}, res=>{
     if(!res.ok){ document.getElementById('main').innerHTML='<div class="waiting"><div class="big">Token inválido</div><p>Abrí esta pantalla como /pantalla.html?token=…</p></div>'; return; }
-    ACT=res.activities; current=res.current; revealed=res.revealed;
+    ACT=res.activities; current=res.current; revealed=res.revealed; liveWC=!!res.liveWC;
     if(current) renderLive(res.agg); else renderWaiting(res.stats?res.stats.total:0);
   });
 }
@@ -85,8 +95,18 @@ function renderWaiting(n){
 
 function findAct(id){ return ACT.find(a=>a.id===id); }
 
-socket.on('activity', d=>{ current=d.activity; revealed=false; renderLive(null); });
-socket.on('results', d=>{ if(current && d.activityId===current.id) renderLive(d.agg, d.revealed); });
+socket.on('activity', d=>{ current=d.activity; revealed=false; liveWC=false; ccSpans={}; ccHeroWord=null; renderLive(null); });
+socket.on('liveWC', d=>{ liveWC=true; });
+socket.on('results', d=>{
+  if(!current || d.activityId!==current.id) return;
+  if(current.type==='wordcloud' && (d.liveWC||d.revealed)){
+    liveWC = liveWC || !!d.liveWC;
+    if(document.getElementById('cloudC')) { updateCloudC(d.agg, !!d.revealed); const l=document.getElementById('ccLabel'); if(l) l.textContent=d.revealed?'LA PALABRA DE LA SALA':'LA SALA ESTÁ ESCRIBIENDO…'; }
+    else renderLive(d.agg, d.revealed);
+    return;
+  }
+  renderLive(d.agg, d.revealed);
+});
 socket.on('revealed', d=>{ revealed=true; if(current&&d.activityId===current.id){ current=d.activity; renderLive(d.agg,true);} });
 socket.on('idle', ()=>{ current=null; revealed=false; renderWaiting(lastTotal); });
 
@@ -103,6 +123,20 @@ function renderLive(agg, rev){
   let html=`<div class="bloque">${esc(act.bloque)}</div><h1>${esc(act.title)}</h1>`;
   const total = agg? agg.total : 0;
 
+  if(act.type==='wordcloud' && (liveWC || rev) ){
+    html += `<div style="flex:1; padding:6px 0">
+      <div class="cloudC" id="cloudC">
+        <div class="deco1"></div><div class="deco2"></div>
+        <div class="cc-label" id="ccLabel">${rev?'LA PALABRA DE LA SALA':'LA SALA ESTÁ ESCRIBIENDO…'}</div>
+        <div class="cc-orbit" id="ccOrbit"></div>
+        <div class="cc-hero"><span id="ccHero"></span></div>
+        <div class="cc-total" id="ccTotal"></div>
+      </div></div>`;
+    document.getElementById('main').innerHTML = html;
+    ccSpans={}; ccHeroWord=null;
+    if(agg) updateCloudC(agg, rev);
+    return;
+  }
   if(!agg || (!rev && (act.type==='quiz'||act.type==='poll'))){
     // antes del reveal: solo contador de respuestas (sin sesgar a la sala)
     html += `<div class="waiting" style="flex:1">
@@ -145,14 +179,37 @@ function renderLive(agg, rev){
     }).join('')+`</table>`;
     if(rev && agg.explain) html += `<div class="explain">${esc(agg.explain)}</div>`;
   }
-  else if(agg.type==='wordcloud'){
-    const max = Math.max(1,...agg.words.map(w=>w[1]));
-    html += `<div class="cloud">`+agg.words.map(([w,n],i)=>{
-      const size = 20 + Math.round(n/max*54);
-      return `<span style="font-size:${size}px;color:${i%3===0?'var(--dark)':i%3===1?'var(--band)':'#7a93ad'};font-weight:${n>1?'bold':'normal'}">${esc(w)}</span>`;
-    }).join('')+`</div><p style="text-align:center;color:#5a6b7d;font-size:18px">${total} palabras recibidas</p>`;
-  }
+
   document.getElementById('main').innerHTML = html;
+}
+const CC_SLOTS = [
+  {l:'7%', t:'20%'},{l:'70%', t:'17%'},{l:'9%', t:'70%'},{l:'68%', t:'72%'},
+  {l:'34%', t:'9%'},{l:'36%', t:'84%'},{l:'3%', t:'45%'},{l:'84%', t:'45%'}
+];
+const CC_SIZES = [46,42,38,35,31,29,27,25];
+let ccSpans = {}, ccHeroWord = null;
+function updateCloudC(agg, final){
+  if(!agg || agg.type!=='wordcloud') return;
+  const words = agg.words || [];
+  const hero = document.getElementById('ccHero');
+  const orbit = document.getElementById('ccOrbit');
+  if(!hero || !orbit) return;
+  if(words.length){
+    const w = words[0][0];
+    hero.style.fontSize = Math.max(70, 170 - Math.max(0,w.length-8)*9)+'px';
+    if(ccHeroWord!==w){ hero.textContent=w; hero.classList.remove('pop'); void hero.offsetWidth; hero.classList.add('pop'); ccHeroWord=w; }
+  }
+  const top = words.slice(1, 1+CC_SLOTS.length);
+  const vivos = new Set(top.map(x=>x[0]));
+  for(const [word] of Object.entries(ccSpans)) if(!vivos.has(word)){ ccSpans[word].remove(); delete ccSpans[word]; }
+  top.forEach(([word], i)=>{
+    let sp = ccSpans[word];
+    if(!sp){ sp=document.createElement('span'); sp.textContent=word; sp.style.opacity='0'; orbit.appendChild(sp); ccSpans[word]=sp;
+      requestAnimationFrame(()=>{ sp.style.opacity='.85'; }); }
+    sp.style.left=CC_SLOTS[i].l; sp.style.top=CC_SLOTS[i].t; sp.style.fontSize=CC_SIZES[i]+'px';
+  });
+  const tt=document.getElementById('ccTotal');
+  if(tt) tt.textContent = agg.total + (agg.total===1?' palabra':' palabras') + ' de la sala · Argentina y Guatemala';
 }
 function bar(label,n,max){
   return `<div class="brow"><div class="lab"><span>${esc(label)}</span><span class="r">${n}</span></div>
