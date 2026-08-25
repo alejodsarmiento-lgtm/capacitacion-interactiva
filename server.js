@@ -26,6 +26,7 @@ const ACTIVITIES = JSON.parse(
 ).activities;
 
 const state = {
+  liveWC: false,                // nube de palabras en vivo (solo wordcloud)
   participants: new Map(),      // socketId -> {nombre, pais, rol, joinedAt}
   currentActivityId: null,
   revealed: false,
@@ -50,6 +51,7 @@ function restoreState() {
     const d = JSON.parse(fs.readFileSync(PERSIST_FILE, 'utf8'));
     state.currentActivityId = d.currentActivityId ?? null;
     state.revealed = !!d.revealed;
+    state.liveWC = !!d.liveWC;
     state.scores = d.scores || { AR: 0, GT: 0 };
     state.scoreEvents = d.scoreEvents || [];
     state.log = d.log || [];
@@ -70,6 +72,7 @@ async function persistState() {
     savedAt: new Date().toISOString(),
     currentActivityId: state.currentActivityId,
     revealed: state.revealed,
+    liveWC: state.liveWC,
     scores: state.scores,
     scoreEvents: state.scoreEvents,
     log: state.log,
@@ -181,8 +184,8 @@ setInterval(() => {
   if (!dirty || !state.currentActivityId) return;
   dirty = false;
   const agg = aggregate(state.currentActivityId);
-  io.to('staff').emit('results', { activityId: state.currentActivityId, agg, revealed: state.revealed });
-  if (state.revealed) io.to('sala').emit('results', { activityId: state.currentActivityId, agg, revealed: true });
+  io.to('staff').emit('results', { activityId: state.currentActivityId, agg, revealed: state.revealed, liveWC: state.liveWC });
+  if (state.revealed || state.liveWC) io.to('sala').emit('results', { activityId: state.currentActivityId, agg, revealed: state.revealed, liveWC: state.liveWC });
 }, 400);
 
 setInterval(() => {
@@ -219,7 +222,8 @@ io.on('connection', socket => {
       current: act ? sanitizeActivity(act) : null,
       meta: act ? actMeta(act.id) : null,
       revealed: state.revealed,
-      agg: state.revealed && act ? aggregate(act.id) : null,
+      liveWC: state.liveWC,
+      agg: act && (state.revealed || state.liveWC) ? aggregate(act.id) : null,
       questions: questionsPayload(),
       stats: publicStats()
     });
@@ -311,6 +315,7 @@ io.on('connection', socket => {
       activities: ACTIVITIES.map(a => ({ id: a.id, type: a.type, bloque: a.bloque, title: a.title })),
       current: act ? sanitizeActivity(act) : null,
       revealed: state.revealed,
+      liveWC: state.liveWC,
       agg: act ? aggregate(act.id) : null,
       stats: publicStats(),
       semaforo: semaforoStats(),
@@ -324,11 +329,23 @@ io.on('connection', socket => {
     if (!act) return cb && cb({ ok: false });
     state.currentActivityId = actId;
     state.revealed = false;
+    state.liveWC = false;
     if (!state.responses.has(actId)) state.responses.set(actId, new Map());
     io.to('sala').emit('activity', { activity: sanitizeActivity(act), revealed: false, meta: actMeta(actId) });
     io.to('staff').emit('activity', { activity: sanitizeActivity(act), revealed: false, meta: actMeta(actId) });
     dirty = true;
     persistDirty = true;
+    cb && cb({ ok: true });
+  });
+
+  socket.on('admin:liveWC', cb => {
+    if (!socket.data.isAdmin || !state.currentActivityId) return;
+    const act = getActivity(state.currentActivityId);
+    if (!act || act.type !== 'wordcloud') return cb && cb({ ok: false, error: 'Solo para nubes de palabras' });
+    state.liveWC = true;
+    persistDirty = true;
+    io.emit('liveWC', { activityId: act.id });
+    dirty = true;
     cb && cb({ ok: true });
   });
 
@@ -383,6 +400,7 @@ app.get('/reset', async (req, res) => {
   if (req.query.token !== ADMIN_TOKEN) return res.status(403).send('Token inválido');
   state.currentActivityId = null;
   state.revealed = false;
+  state.liveWC = false;
   state.responses = new Map();
   state.scores = { AR: 0, GT: 0 };
   state.scoreEvents = [];
