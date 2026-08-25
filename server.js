@@ -114,11 +114,11 @@ function actMeta(id) {
 }
 
 function publicStats() {
-  let ar = 0, gt = 0;
+  let ar = 0, gt = 0, ot = 0;
   for (const p of state.participants.values()) {
-    if (p.pais === 'AR') ar++; else if (p.pais === 'GT') gt++;
+    if (p.pais === 'AR') ar++; else if (p.pais === 'GT') gt++; else ot++;
   }
-  return { total: state.participants.size, ar, gt, scores: state.scores };
+  return { total: state.participants.size, ar, gt, ot, scores: state.scores };
 }
 
 function semaforoStats() {
@@ -211,10 +211,12 @@ io.on('connection', socket => {
   // --- Participante ---
   socket.on('join', (data, cb) => {
     const nombre = String(data?.nombre || '').trim().slice(0, 40);
-    const pais = ['AR', 'GT'].includes(data?.pais) ? data.pais : 'AR';
-    const rol = ['inspector', 'funcionario', 'abogado', 'otro'].includes(data?.rol) ? data.rol : 'otro';
+    const pais = ['AR', 'GT'].includes(data?.pais) ? data.pais : 'OT';
+    const paisOtro = pais === 'OT' ? String(data?.paisOtro || '').trim().slice(0, 40) : '';
+    const rol = ['inspector', 'funcionario', 'abogado', 'trabajador', 'otro'].includes(data?.rol) ? data.rol : 'otro';
     if (!nombre) return cb && cb({ ok: false, error: 'Falta el nombre' });
-    state.participants.set(socket.id, { nombre, pais, rol, joinedAt: Date.now() });
+    if (pais === 'OT' && !paisOtro) return cb && cb({ ok: false, error: 'Escribí desde qué país te conectás' });
+    state.participants.set(socket.id, { nombre, pais, paisOtro, rol, joinedAt: Date.now() });
     socket.join('sala');
     const act = state.currentActivityId ? getActivity(state.currentActivityId) : null;
     cb && cb({
@@ -265,7 +267,8 @@ io.on('connection', socket => {
 
     state.log.push({
       ts: new Date().toISOString(), activityId: actId, tipo: act.type,
-      nombre: p.nombre, pais: p.pais, rol: p.rol, valor: JSON.stringify(data.value)
+      nombre: p.nombre, pais: p.pais === 'OT' ? (p.paisOtro || 'Otro') : p.pais,
+      rol: p.rol, valor: JSON.stringify(data.value)
     });
     dirty = true;
     persistDirty = true;
