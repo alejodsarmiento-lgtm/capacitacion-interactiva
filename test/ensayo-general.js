@@ -9,6 +9,20 @@
 const path = require('path');
 const { io } = require('socket.io-client');
 const ACTIVITIES = require(path.join(__dirname, '..', 'data', 'activities.json')).activities;
+const https = require('https');
+const http = require('http');
+
+// GET simple sin fetch (compatible con Node v18-v24)
+function httpGet(url) {
+  return new Promise((resolve, reject) => {
+    const lib = url.startsWith('https') ? https : http;
+    lib.get(url, res => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => resolve(data));
+    }).on('error', reject);
+  });
+}
 
 const N = parseInt(process.argv[2] || '240', 10);
 const URL = process.argv[3] || 'http://localhost:3000';
@@ -159,8 +173,8 @@ async function main() {
 
   // --- Cierre y verificación ---
   await sleep(1500);
-  const csv = await (await fetch(`${URL}/export.csv?token=${ADMIN_TOKEN}`)).text();
-  const salud = await (await fetch(`${URL}/salud`)).json();
+  const csv = await httpGet(`${URL}/export.csv?token=${ADMIN_TOKEN}`);
+  const salud = JSON.parse(await httpGet(`${URL}/salud`));
   const filas = csv.split('\n').filter(l => l.trim()).length;
   // verificar que aparecen los 6 países: nativos por código (AR/GT), otros por su texto
   const paisesEnCsv = PAISES.filter(p => {
